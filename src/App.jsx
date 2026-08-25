@@ -14,6 +14,7 @@ import ProgressHeader from './components/ProgressHeader'
 import BulkAddModal from './components/BulkAddModal'
 import ResetButton from './components/ResetButton'
 import SetupWizard from './components/SetupWizard'
+import InstallPrompt from './components/InstallPrompt'
 
 export default function App() {
   const [counts, setCounts, resetCounts] = useLocalStorage(STORAGE_KEY, createEmptyCounts())
@@ -101,6 +102,9 @@ export default function App() {
             <span className="h-px w-8 bg-gradient-to-l from-transparent to-amber-500/30" />
           </div>
         </header>
+
+        {/* Telefona Yükle Banner'ı */}
+        <InstallPrompt />
 
         {/* Toplu Hesaplama Butonu — İslami Altın/Zümrüt Vurgulu */}
         <button
