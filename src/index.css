@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-surface-950 text-zinc-100 antialiased font-sans;
+    background-color: #07080c;
+  }
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  /* İslami Selçuklu / Endülüs Geometrik Yıldız Motifi Arka Planı */
+  .islamic-pattern {
+    background-color: #07080c;
+    background-image:
+      radial-gradient(circle at 50% 0%, rgba(6, 78, 59, 0.18) 0%, transparent 60%),
+      radial-gradient(circle at 100% 60%, rgba(88, 28, 135, 0.15) 0%, transparent 55%),
+      radial-gradient(circle at 0% 100%, rgba(180, 83, 9, 0.08) 0%, transparent 50%),
+      url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23fbbf24' fill-opacity='0.025' fill-rule='evenodd'%3E%3Cpath d='M0 0h40v40H0V0zm40 40h40v40H40V40zm0-40h40v40H40V0zM0 40h40v40H0V40z'/%3E%3Cpath d='M20 0l20 20-20 20L0 20 20 0zm40 40l20 20-20 20-20-20 20-20zm0-40l20 20-20 20-20-20 20-20zM20 40l20 20-20 20L0 60l20-20z'/%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* Görkemli Saray Kart Yüzeyi */
+  .islamic-card {
+    position: relative;
+    background: linear-gradient(145deg, rgba(15, 17, 26, 0.85), rgba(21, 24, 38, 0.9));
+    border: 1px solid rgba(251, 191, 36, 0.12);
+    box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+  }
+
+  .islamic-card-emerald {
+    position: relative;
+    background: linear-gradient(145deg, rgba(6, 78, 59, 0.2), rgba(15, 17, 26, 0.9));
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(16, 185, 129, 0.1);
+    backdrop-filter: blur(12px);
+  }
+
+  .islamic-card-violet {
+    position: relative;
+    background: linear-gradient(145deg, rgba(88, 28, 135, 0.2), rgba(15, 17, 26, 0.9));
+    border: 1px solid rgba(168, 85, 247, 0.2);
+    box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(168, 85, 247, 0.1);
+    backdrop-filter: blur(12px);
+  }
+
+  /* Altın Gradyan Metin */
+  .text-gold-gradient {
+    background: linear-gradient(135deg, #fef08a 0%, #fbbf24 40%, #d97706 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* İslami Yeşil - Mor İhtişam Gradyanı Metin */
+  .text-royal-gradient {
+    background: linear-gradient(135deg, #34d399 0%, #a78bfa 50%, #fbbf24 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Altın Gradyan Buton */
+  .btn-gold-gradient {
+    background: linear-gradient(135deg, #b45309 0%, #d97706 50%, #f59e0b 100%);
+    color: #07080c;
+    box-shadow: 0 4px 20px rgba(217, 119, 6, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  .btn-gold-gradient:hover {
+    background: linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #fbbf24 100%);
+    box-shadow: 0 6px 24px rgba(245, 158, 11, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  }
+
+  /* Derin Mihrab Header ışıma efekti */
+  .mihrab-glow {
+    background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(6, 78, 59, 0.25) 0%, rgba(88, 28, 135, 0.15) 50%, transparent 80%);
+  }
+
+  /* Altın Çerçeve İncelik Vurgusu */
+  .gold-trim {
+    border-image: linear-gradient(to right, rgba(251, 191, 36, 0.3), rgba(16, 185, 129, 0.3), rgba(168, 85, 247, 0.3)) 1;
+  }
+}
+
+@layer utilities {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
