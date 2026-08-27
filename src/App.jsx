@@ -16,6 +16,7 @@ import ResetButton from './components/ResetButton'
 import SetupWizard from './components/SetupWizard'
 import InstallPrompt from './components/InstallPrompt'
 import BirthdayBanner from './components/BirthdayBanner'
+import { Analytics } from '@vercel/analytics/react'
 
 export default function App() {
   const [counts, setCounts, resetCounts] = useLocalStorage(STORAGE_KEY, createEmptyCounts())
@@ -145,6 +146,9 @@ export default function App() {
       {modalOpen && (
         <BulkAddModal onClose={() => setModalOpen(false)} onApply={handleBulkApply} />
       )}
+
+      {/* Vercel Analytics Ziyaretçi & Etkileşim Takibi */}
+      <Analytics />
     </div>
   )
 }
