@@ -15,6 +15,7 @@ import BulkAddModal from './components/BulkAddModal'
 import ResetButton from './components/ResetButton'
 import SetupWizard from './components/SetupWizard'
 import InstallPrompt from './components/InstallPrompt'
+import BirthdayBanner from './components/BirthdayBanner'
 
 export default function App() {
   const [counts, setCounts, resetCounts] = useLocalStorage(STORAGE_KEY, createEmptyCounts())
@@ -23,7 +24,7 @@ export default function App() {
     0
   )
   const [onboardingDone, setOnboardingDone] = useLocalStorage(STORAGE_KEY_ONBOARDING, false)
-  const [, setProfile] = useLocalStorage(STORAGE_KEY_PROFILE, null)
+  const [profile, setProfile] = useLocalStorage(STORAGE_KEY_PROFILE, null)
   const [modalOpen, setModalOpen] = useState(false)
 
   const totalRemaining = Object.values(counts).reduce((sum, n) => sum + n, 0)
@@ -105,6 +106,9 @@ export default function App() {
 
         {/* Telefona Yükle Banner'ı */}
         <InstallPrompt />
+
+        {/* Hicrî & Miladî Doğum Günü Tebrik & Yaş Kartı */}
+        <BirthdayBanner profile={profile} />
 
         {/* Toplu Hesaplama Butonu — İslami Altın/Zümrüt Vurgulu */}
         <button
