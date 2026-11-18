@@ -48,21 +48,21 @@ export default function InstallPrompt() {
   return (
     <>
       {/* Üstte veya Altta Şık İndirme Butonu Banner'ı */}
-      <div className="mb-5 rounded-2xl islamic-card-emerald p-3.5 border border-emerald-500/30 flex items-center justify-between gap-3 shadow-lg">
+      <div className="mb-5 rounded-2xl islamic-card-emerald p-3.5 border border-primary-500/30 flex items-center justify-between gap-3 shadow-lg">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/30 to-amber-500/20 border border-emerald-400/30">
-            <Smartphone size={20} className="text-emerald-300" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500/30 to-accent-500/20 border border-primary-400/30">
+            <Smartphone size={20} className="text-primary-300" />
           </div>
           <div>
             <p className="text-xs font-bold text-zinc-100">Telefona Uygulama Olarak Yükle</p>
-            <p className="text-[10px] text-emerald-200/70">Ana ekrana ekle, internetsiz kullan</p>
+            <p className="text-[10px] text-primary-200/70">Ana ekrana ekle, internetsiz kullan</p>
           </div>
         </div>
 
         <button
           type="button"
           onClick={handleInstallClick}
-          className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl font-bold text-xs btn-gold-gradient shrink-0 active:scale-95 transition-all shadow-md"
+          className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl font-bold text-xs btn-brand-gradient shrink-0 active:scale-95 transition-all shadow-md"
         >
           <Download size={14} />
           Yükle
@@ -76,12 +76,12 @@ export default function InstallPrompt() {
           onClick={() => setShowModal(false)}
         >
           <div
-            className="w-full max-w-sm rounded-t-3xl sm:rounded-2xl islamic-card p-5 border border-amber-500/30 animate-slide-up"
+            className="w-full max-w-sm rounded-t-3xl sm:rounded-2xl islamic-card p-5 border border-accent-500/30 animate-slide-up"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <Smartphone size={18} className="text-amber-400" />
+                <Smartphone size={18} className="text-accent-400" />
                 <h3 className="font-bold text-zinc-100 text-sm">Telefona Nasıl Kurulur?</h3>
               </div>
               <button
@@ -97,15 +97,15 @@ export default function InstallPrompt() {
               /* iPhone Adımları */
               <div className="space-y-3 text-xs text-zinc-300 py-1">
                 <div className="flex items-start gap-2.5">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-500/20 text-amber-300 font-bold text-[10px]">1</span>
-                  <p>Ekranın altındaki <Share2 size={13} className="inline text-amber-300 mx-0.5" /> <b>Paylaş</b> simgesine dokunun.</p>
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-500/20 text-accent-300 font-bold text-[10px]">1</span>
+                  <p>Ekranın altındaki <Share2 size={13} className="inline text-accent-300 mx-0.5" /> <b>Paylaş</b> simgesine dokunun.</p>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-500/20 text-amber-300 font-bold text-[10px]">2</span>
-                  <p>Açılan listeden <PlusSquare size={13} className="inline text-amber-300 mx-0.5" /> <b>Ana Ekrana Ekle</b> seçeneğini seçin.</p>
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-500/20 text-accent-300 font-bold text-[10px]">2</span>
+                  <p>Açılan listeden <PlusSquare size={13} className="inline text-accent-300 mx-0.5" /> <b>Ana Ekrana Ekle</b> seçeneğini seçin.</p>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-500/20 text-amber-300 font-bold text-[10px]">3</span>
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-500/20 text-accent-300 font-bold text-[10px]">3</span>
                   <p>Sağ üstteki <b>Ekle</b> butonuna basın. Uygulama ikonunuz ana ekrana eklenecektir!</p>
                 </div>
               </div>
@@ -113,15 +113,15 @@ export default function InstallPrompt() {
               /* Android / Chrome Adımları */
               <div className="space-y-3 text-xs text-zinc-300 py-1">
                 <div className="flex items-start gap-2.5">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-500/20 text-amber-300 font-bold text-[10px]">1</span>
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-500/20 text-accent-300 font-bold text-[10px]">1</span>
                   <p>Chrome sağ üst köşesindeki <b>üç nokta (⋮)</b> menüsüne dokunun.</p>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-500/20 text-amber-300 font-bold text-[10px]">2</span>
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-500/20 text-accent-300 font-bold text-[10px]">2</span>
                   <p>Menüden <b>"Uygulamayı Yükle"</b> veya <b>"Ana Ekrana Ekle"</b> seçeneğine basın.</p>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-500/20 text-amber-300 font-bold text-[10px]">3</span>
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-500/20 text-accent-300 font-bold text-[10px]">3</span>
                   <p>Çıkan onaya <b>Yükle</b> deyin. Uygulama telefonunuza yüklenecektir!</p>
                 </div>
               </div>

@@ -1,5 +1,4 @@
-import { useState, useCallback } from 'react'
-import { Calculator } from 'lucide-react'
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import {
   PRAYERS,
   STORAGE_KEY,
@@ -9,14 +8,25 @@ import {
   createEmptyCounts
 } from './constants/prayers'
 import { useLocalStorage } from './hooks/useLocalStorage'
-import PrayerCard from './components/PrayerCard'
-import ProgressHeader from './components/ProgressHeader'
+import { useHistory } from './hooks/useHistory'
+import { useReminders } from './hooks/useReminders'
+import {
+  STORAGE_KEY_LOCATION,
+  STORAGE_KEY_PRAYER_OFFSETS,
+  STORAGE_KEY_REMINDERS
+} from './constants/storage'
+import { DEFAULT_REMINDER_SETTINGS, normalizeReminderSettings } from './utils/reminders'
+import { NOTIFICATION_CLICK_MESSAGE } from './utils/notifications'
 import BulkAddModal from './components/BulkAddModal'
-import ResetButton from './components/ResetButton'
 import SetupWizard from './components/SetupWizard'
-import InstallPrompt from './components/InstallPrompt'
-import BirthdayBanner from './components/BirthdayBanner'
+import UndoToast from './components/UndoToast'
+import TabBar from './components/TabBar'
+import TrackingScreen from './screens/TrackingScreen'
+import SummaryScreen from './screens/SummaryScreen'
+import SettingsScreen from './screens/SettingsScreen'
 import { Analytics } from '@vercel/analytics/react'
+
+const DEFAULT_OFFSETS = { sabah: 0, ogle: 0, ikindi: 0, aksam: 0, yatsi: 0, vitir: 0 }
 
 export default function App() {
   const [counts, setCounts, resetCounts] = useLocalStorage(STORAGE_KEY, createEmptyCounts())
@@ -28,31 +38,168 @@ export default function App() {
   const [profile, setProfile] = useLocalStorage(STORAGE_KEY_PROFILE, null)
   const [modalOpen, setModalOpen] = useState(false)
 
+  // 📊 Günlük kaza geçmişi (Faz 0)
+  const { history, recordChange, recordBulk, revertChange, resetHistory } = useHistory()
+
+  // 🧭 Aktif sekme (Takip | Özet | Ayarlar)
+  const [activeTab, setActiveTab] = useState('tracking')
+
+  // 📍 Konum + vakit sapması + 🔔 hatırlatma ayarı (Faz 3: zamanlayıcı da kullanır)
+  const [location, setLocation] = useLocalStorage(STORAGE_KEY_LOCATION, null)
+  const [offsets, setOffsets] = useLocalStorage(STORAGE_KEY_PRAYER_OFFSETS, DEFAULT_OFFSETS)
+  const [remindersRaw, setReminders] = useLocalStorage(STORAGE_KEY_REMINDERS, DEFAULT_REMINDER_SETTINGS)
+  const reminders = useMemo(() => normalizeReminderSettings(remindersRaw), [remindersRaw])
+
+  // ✨ Bildirime dokununca: Takip sekmesi + ilgili vakit kartı vurgulanır
+  const [highlightId, setHighlightId] = useState(null)
+  const focusPrayer = useCallback((data) => {
+    setActiveTab('tracking')
+    if (data?.prayerId) setHighlightId(data.prayerId)
+  }, [])
+
+  useEffect(() => {
+    if (!highlightId) return undefined
+    const t = setTimeout(() => setHighlightId(null), 6000)
+    return () => clearTimeout(t)
+  }, [highlightId])
+
+  useEffect(() => {
+    // Uygulama kapalıyken bildirime dokunulduysa SW ?vakit=<id> ile açar
+    const params = new URLSearchParams(window.location.search)
+    const vakit = params.get('vakit')
+    if (vakit) {
+      focusPrayer({ prayerId: vakit })
+      params.delete('vakit')
+      const qs = params.toString()
+      window.history.replaceState(null, '', window.location.pathname + (qs ? `?${qs}` : ''))
+    }
+    if (!('serviceWorker' in navigator)) return undefined
+    const onMessage = (e) => {
+      if (e.data?.type === NOTIFICATION_CLICK_MESSAGE) focusPrayer(e.data.data)
+    }
+    navigator.serviceWorker.addEventListener('message', onMessage)
+    return () => navigator.serviceWorker.removeEventListener('message', onMessage)
+  }, [focusPrayer])
+
+
+  // 🔒 Kilit modu — varsayılan kilitli
+  const [locked, setLocked] = useState(true)
+
+  // 🔎 Kilit butonu ipucu — "Kilitli" yazısına basılınca butonu vurgular
+  const [lockHintActive, setLockHintActive] = useState(false)
+  const lockButtonRef = useRef(null)
+  const lockHintTimer = useRef(null)
+
+  const handleLockHint = useCallback(() => {
+    // Önceki vurguyu temizle
+    if (lockHintTimer.current) {
+      clearTimeout(lockHintTimer.current)
+      lockHintTimer.current = null
+    }
+
+    // Kilit butonuna yumuşak kaydır
+    const el = lockButtonRef.current
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+
+    // Butonu parlat
+    setLockHintActive(true)
+    lockHintTimer.current = setTimeout(() => {
+      setLockHintActive(false)
+      lockHintTimer.current = null
+    }, 3600)
+  }, [])
+
+  // Bileşen ayrılırken vurgu timer'ını temizle
+  useEffect(() => {
+    return () => {
+      if (lockHintTimer.current) {
+        clearTimeout(lockHintTimer.current)
+        lockHintTimer.current = null
+      }
+    }
+  }, [])
+
+  // 📩 Undo toast state
+  const [undoAction, setUndoAction] = useState(null)
+  const undoIdCounter = useRef(0)
+
   const totalRemaining = Object.values(counts).reduce((sum, n) => sum + n, 0)
 
+  // 🔔 Vakit hatırlatmaları (uygulama açıkken / arka planda canlıyken)
+  useReminders({
+    location: onboardingDone ? location : null,
+    offsets,
+    settings: reminders,
+    counts,
+    onNotificationClick: focusPrayer
+  })
+
   const handleCardChange = useCallback(
-    (id, nextValue) => {
-      setCounts((prev) => ({ ...prev, [id]: nextValue }))
+    (id, nextValue, delta) => {
+      const prevValue = counts[id] ?? 0
+      const prayerInfo = PRAYERS.find((p) => p.id === id)
+
+      undoIdCounter.current += 1
+      setUndoAction({
+        id: undoIdCounter.current,
+        prayerId: id,
+        prayerName: prayerInfo?.name || id,
+        delta,
+        prevValue,
+        timestamp: Date.now()
+      })
+
+      const next = { ...counts, [id]: nextValue }
+      setCounts(next)
+
+      // 📊 Geçmişe kaydet — anlık kalan borç görüntüsüyle birlikte
+      // delta < 0 → namaz kılındı (borç azaldı) → 'kaza'
+      // delta > 0 → borç arttı → 'bulk'
+      recordChange(id, delta, next)
     },
-    [setCounts]
+    [counts, setCounts, recordChange]
   )
+
+  const handleUndo = useCallback(() => {
+    if (!undoAction) return
+    const next = {
+      ...counts,
+      [undoAction.prayerId]: undoAction.prevValue
+    }
+    setCounts(next)
+    setUndoAction(null)
+
+    // 📊 Geçmişte de geri al
+    revertChange(undoAction.prayerId, undoAction.delta, next)
+  }, [undoAction, setCounts, counts, revertChange])
+
+  const handleUndoExpire = useCallback(() => {
+    setUndoAction(null)
+  }, [])
 
   const handleBulkApply = useCallback(
     (addition) => {
-      setCounts((prev) => {
-        const next = { ...prev }
-        for (const id of Object.keys(addition)) {
-          next[id] = (next[id] || 0) + addition[id]
-        }
-        return next
-      })
+      const next = { ...counts }
+      for (const id of Object.keys(addition)) {
+        next[id] = (next[id] || 0) + addition[id]
+      }
+      setCounts(next)
+
+      // 📊 Toplu ekleme geçmişe yazılır (bulk kovası).
+      // NOT: setCounts updater'ı içinde çağrılmıyor — React StrictMode'da
+      // updater iki kez çalışır ve kayıt çift yazılırdı.
+      recordBulk(addition, next)
+
       setInitialTotal((prevInitial) => {
         const additionSum = Object.values(addition).reduce((s, n) => s + n, 0)
         return prevInitial + additionSum
       })
     },
-    [setCounts, setInitialTotal]
+    [counts, setCounts, setInitialTotal, recordBulk]
   )
+
 
   const handleSetupComplete = useCallback(
     (prayerCounts, total, profile) => {
@@ -67,9 +214,10 @@ export default function App() {
   const handleReset = useCallback(() => {
     resetCounts()
     resetInitialTotal()
+    resetHistory()
     setOnboardingDone(false)
     setProfile(null)
-  }, [resetCounts, resetInitialTotal, setOnboardingDone, setProfile])
+  }, [resetCounts, resetInitialTotal, resetHistory, setOnboardingDone, setProfile])
 
   // İlk açılışta setup wizard
   if (!onboardingDone) {
@@ -80,72 +228,65 @@ export default function App() {
     <div className="relative min-h-screen bg-surface-950 islamic-pattern overflow-hidden">
       {/* İslami Derin Arka Plan Işıması (Zümrüt Yeşili & Kraliyet Moru) */}
       <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute -top-36 left-1/2 -translate-x-1/2 w-[600px] h-[450px] bg-emerald-800/[0.12] rounded-full blur-[140px] animate-ambient-glow" />
-        <div className="absolute top-1/3 -right-28 w-[400px] h-[400px] bg-purple-900/[0.12] rounded-full blur-[130px] animate-ambient-glow" style={{ animationDelay: '2s' }} />
-        <div className="absolute -bottom-28 -left-28 w-[380px] h-[380px] bg-amber-700/[0.06] rounded-full blur-[120px] animate-ambient-glow" style={{ animationDelay: '4s' }} />
+        <div className="absolute -top-36 left-1/2 -translate-x-1/2 w-[600px] h-[450px] bg-primary-800/[0.12] rounded-full blur-[140px] animate-ambient-glow" />
+        <div className="absolute top-1/3 -right-28 w-[400px] h-[400px] bg-accent-900/[0.12] rounded-full blur-[130px] animate-ambient-glow" style={{ animationDelay: '2s' }} />
+        <div className="absolute -bottom-28 -left-28 w-[380px] h-[380px] bg-accent-700/[0.06] rounded-full blur-[120px] animate-ambient-glow" style={{ animationDelay: '4s' }} />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-md px-4 pb-12">
-        {/* İlerleme çubuğu — sticky header */}
-        <ProgressHeader totalRemaining={totalRemaining} initialTotal={initialTotal} />
+      <div className="relative z-10 mx-auto max-w-md px-4 pb-28">
+        {/* ── Aktif ekran ── */}
+        {activeTab === 'tracking' && (
+          <TrackingScreen
+            counts={counts}
+            initialTotal={initialTotal}
+            totalRemaining={totalRemaining}
+            profile={profile}
+            locked={locked}
+            onToggleLock={() => {
+              setLocked((prev) => !prev)
+              setLockHintActive(false)
+            }}
+            lockHintActive={lockHintActive}
+            lockButtonRef={lockButtonRef}
+            onLockHint={handleLockHint}
+            onOpenBulk={() => setModalOpen(true)}
+            onCardChange={handleCardChange}
+            highlightId={highlightId}
+          />
+        )}
 
-        {/* Görkemli Başlık Bölgesi */}
-        <header className="pt-5 pb-4 text-center">
-          {/* Besmele-i Şerif */}
-          <p className="font-serif text-amber-300/80 text-sm tracking-wide mb-1 select-none">
-            بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
-          </p>
-          <h1 className="text-2xl font-black text-royal-gradient tracking-tight">
-            Kaza Namazı Takip
-          </h1>
-          <div className="flex items-center justify-center gap-2 mt-1">
-            <span className="h-px w-8 bg-gradient-to-r from-transparent to-amber-500/30" />
-            <p className="text-xs text-zinc-400 font-medium">Vakitlerini seç, borcunu eda et</p>
-            <span className="h-px w-8 bg-gradient-to-l from-transparent to-amber-500/30" />
-          </div>
-        </header>
+        {activeTab === 'summary' && (
+          <SummaryScreen history={history} totalRemaining={totalRemaining} />
+        )}
 
-        {/* Telefona Yükle Banner'ı */}
-        <InstallPrompt />
-
-        {/* Hicrî & Miladî Doğum Günü Tebrik & Yaş Kartı */}
-        <BirthdayBanner profile={profile} />
-
-        {/* Toplu Hesaplama Butonu — İslami Altın/Zümrüt Vurgulu */}
-        <button
-          type="button"
-          onClick={() => setModalOpen(true)}
-          className="group relative flex items-center justify-center gap-2.5 w-full h-13 rounded-2xl font-extrabold mb-6 overflow-hidden transition-all duration-200 active:scale-[0.98] islamic-card border border-amber-500/30 shadow-lg"
-          aria-label="Toplu kaza namazı hesapla ve ekle"
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-emerald-900/30 via-purple-900/30 to-amber-900/20 group-hover:opacity-100 transition-opacity" />
-          <Calculator size={19} className="relative text-amber-400" />
-          <span className="relative text-gold-gradient text-sm tracking-wide">
-            Toplu Kaza Hesapla ve Ekle
-          </span>
-        </button>
-
-        {/* Vakit kartları */}
-        <div className="space-y-3 mb-6">
-          {PRAYERS.map((prayer, index) => (
-            <PrayerCard
-              key={prayer.id}
-              prayer={prayer}
-              count={counts[prayer.id] || 0}
-              onChange={handleCardChange}
-              index={index}
-            />
-          ))}
-        </div>
-
-        {/* Sıfırlama */}
-        <ResetButton onConfirm={handleReset} />
+        {activeTab === 'settings' && (
+          <SettingsScreen
+            onReset={handleReset}
+            profile={profile}
+            location={location}
+            onLocationChange={setLocation}
+            offsets={offsets}
+            onOffsetsChange={setOffsets}
+            reminders={reminders}
+            onRemindersChange={setReminders}
+          />
+        )}
       </div>
+
+      {/* ── Alt tab bar ── */}
+      <TabBar activeTab={activeTab} onChange={setActiveTab} />
 
       {/* Toplu hesaplama modalı */}
       {modalOpen && (
         <BulkAddModal onClose={() => setModalOpen(false)} onApply={handleBulkApply} />
       )}
+
+      {/* Undo Toast — ekranın altında minimal bildirim */}
+      <UndoToast
+        action={undoAction}
+        onUndo={handleUndo}
+        onExpire={handleUndoExpire}
+      />
 
       {/* Vercel Analytics Ziyaretçi & Etkileşim Takibi */}
       <Analytics />

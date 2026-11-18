@@ -8,13 +8,13 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'icons/*.png'],
+      includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'icons/*.png', 'sw-notifications.js'],
       manifest: {
         name: 'Kaza Namazı Takip',
         short_name: 'Kaza Takip',
         description: 'Kaza namazlarınızı kolayca takip edin ve borcunuzu kapatın.',
-        theme_color: '#07080c',
-        background_color: '#07080c',
+        theme_color: '#08070d',
+        background_color: '#08070d',
         display: 'standalone',
         orientation: 'portrait',
         start_url: '/',
@@ -39,7 +39,9 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}']
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // Bildirime dokunma işleyicisi (public/sw-notifications.js) — Faz 3
+        importScripts: ['sw-notifications.js']
       }
     })
   ]

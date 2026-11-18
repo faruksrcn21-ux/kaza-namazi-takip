@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { X, Calculator, Minus, Plus, User, UserRound, CalendarDays } from 'lucide-react'
+import { X, Calculator, Minus, Plus, User, UserRound, CalendarDays, Lightbulb } from 'lucide-react'
 import { PRAYERS } from '../constants/prayers'
 import { calculateTotalDays, calculateWithGender, buildBulkAddition } from '../utils/prayerCalculations'
 
@@ -34,14 +34,14 @@ function NumberField({ label, value, onChange, min = 0, max = 999, hint }) {
             const v = e.target.value === '' ? min : Number(e.target.value)
             onChange(Math.max(min, Math.min(max, v)))
           }}
-          className="w-full rounded-xl bg-surface-900 border border-white/[0.08] px-2 py-2 text-center text-lg font-bold tabular-nums text-emerald-300 placeholder:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition-all"
+          className="w-full rounded-xl bg-surface-900 border border-white/[0.08] px-2 py-2 text-center text-lg font-bold tabular-nums text-primary-300 placeholder:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-accent-500/40 transition-all"
         />
         <button
           type="button"
           onClick={handleIncrement}
           disabled={value >= max}
           aria-label={`${label} artır`}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 border border-emerald-500/20 text-emerald-300 hover:bg-emerald-500/25 active:scale-[0.93] transition-all disabled:opacity-25"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-500/15 border border-primary-500/20 text-primary-300 hover:bg-primary-500/25 active:scale-[0.93] transition-all disabled:opacity-25"
         >
           <Plus size={14} />
         </button>
@@ -73,12 +73,12 @@ function CompactDurationField({ label, value, onChange, max = 999 }) {
           placeholder="0"
           onFocus={(e) => e.target.select()}
           onChange={(e) => onChange(e.target.value === '' ? 0 : Math.max(0, Number(e.target.value)))}
-          className="w-full text-center text-lg font-extrabold tabular-nums text-gold-gradient bg-transparent focus:outline-none placeholder:text-zinc-700"
+          className="w-full text-center text-lg font-extrabold tabular-nums text-brand-gradient bg-transparent focus:outline-none placeholder:text-zinc-700"
         />
         <button
           type="button"
           onClick={() => onChange(Math.min(max, value + 1))}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 active:scale-90 transition-all"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent-500/20 text-accent-300 hover:bg-accent-500/30 active:scale-90 transition-all"
         >
           <Plus size={12} />
         </button>
@@ -97,7 +97,7 @@ function Checkbox({ checked, onChange, children }) {
           onChange={(e) => onChange(e.target.checked)}
           className="peer sr-only"
         />
-        <div className="h-5 w-5 rounded-md border border-amber-500/30 bg-surface-850 peer-checked:bg-gradient-to-br peer-checked:from-emerald-600 peer-checked:to-amber-600 peer-checked:border-amber-400 transition-all flex items-center justify-center">
+        <div className="h-5 w-5 rounded-md border border-accent-500/30 bg-surface-850 peer-checked:bg-gradient-to-br peer-checked:from-primary-600 peer-checked:to-accent-600 peer-checked:border-accent-400 transition-all flex items-center justify-center">
           {checked && (
             <svg className="w-3.5 h-3.5 text-surface-950 stroke-[3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -105,7 +105,7 @@ function Checkbox({ checked, onChange, children }) {
           )}
         </div>
       </div>
-      <span className="group-hover:text-amber-200 transition-colors">{children}</span>
+      <span className="group-hover:text-accent-200 transition-colors">{children}</span>
     </label>
   )
 }
@@ -153,14 +153,14 @@ export default function BulkAddModal({ onClose, onApply }) {
       onClick={onClose}
     >
       <div
-        className="w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl islamic-card p-5.5 safe-bottom animate-slide-up max-h-[90vh] overflow-y-auto border border-amber-500/20 shadow-2xl"
+        className="w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl islamic-card p-5.5 safe-bottom animate-slide-up max-h-[90vh] overflow-y-auto border border-accent-500/20 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Başlık */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-900/50 to-amber-900/40 border border-amber-500/30">
-              <Calculator size={19} className="text-amber-400" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary-900/50 to-accent-900/40 border border-accent-500/30">
+              <Calculator size={19} className="text-accent-400" />
             </div>
             <div>
               <h2 className="font-extrabold text-zinc-100 text-base">Toplu Kaza Hesapla</h2>
@@ -184,7 +184,7 @@ export default function BulkAddModal({ onClose, onApply }) {
             onClick={() => setCalcMode('simple')}
             className={`h-10.5 rounded-xl text-xs font-bold transition-all active:scale-[0.97] ${
               calcMode === 'simple'
-                ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-300'
+                ? 'bg-primary-500/20 border border-primary-500/40 text-primary-300'
                 : 'bg-surface-850 border border-white/[0.06] text-zinc-400 hover:bg-surface-800'
             }`}
           >
@@ -195,7 +195,7 @@ export default function BulkAddModal({ onClose, onApply }) {
             onClick={() => setCalcMode('detailed')}
             className={`h-10.5 rounded-xl text-xs font-bold transition-all active:scale-[0.97] ${
               calcMode === 'detailed'
-                ? 'bg-purple-500/20 border border-purple-500/40 text-purple-300'
+                ? 'bg-accent-500/20 border border-accent-500/40 text-accent-300'
                 : 'bg-surface-850 border border-white/[0.06] text-zinc-400 hover:bg-surface-800'
             }`}
           >
@@ -230,7 +230,7 @@ export default function BulkAddModal({ onClose, onApply }) {
                 onClick={() => setGender('male')}
                 className={`flex items-center justify-center gap-2 h-11 rounded-xl font-bold transition-all active:scale-[0.97] ${
                   gender === 'male'
-                    ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-300'
+                    ? 'bg-primary-500/20 border border-primary-500/40 text-primary-300'
                     : 'bg-surface-850 border border-white/[0.06] text-zinc-400 hover:bg-surface-800'
                 }`}
               >
@@ -242,7 +242,7 @@ export default function BulkAddModal({ onClose, onApply }) {
                 onClick={() => setGender('female')}
                 className={`flex items-center justify-center gap-2 h-11 rounded-xl font-bold transition-all active:scale-[0.97] ${
                   gender === 'female'
-                    ? 'bg-purple-500/20 border border-purple-500/40 text-purple-300'
+                    ? 'bg-accent-500/20 border border-accent-500/40 text-accent-300'
                     : 'bg-surface-850 border border-white/[0.06] text-zinc-400 hover:bg-surface-800'
                 }`}
               >
@@ -262,7 +262,7 @@ export default function BulkAddModal({ onClose, onApply }) {
                   value={birthDate}
                   onChange={(e) => setBirthDate(e.target.value)}
                   max={new Date().toISOString().split('T')[0]}
-                  className="w-full rounded-xl bg-surface-900 border border-white/[0.08] pl-9 pr-3 py-2 text-sm font-semibold text-zinc-100 focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition-all [color-scheme:dark]"
+                  className="w-full rounded-xl bg-surface-900 border border-white/[0.08] pl-9 pr-3 py-2 text-sm font-semibold text-zinc-100 focus:outline-none focus:ring-2 focus:ring-accent-500/40 transition-all [color-scheme:dark]"
                 />
               </div>
             </div>
@@ -297,8 +297,8 @@ export default function BulkAddModal({ onClose, onApply }) {
             </div>
 
             {gender === 'female' && (
-              <div className="rounded-xl bg-purple-950/40 border border-purple-500/20 p-3 mb-4 space-y-3 animate-fade-in">
-                <p className="text-[11px] text-purple-300 font-semibold">Hayız & nifas düşümü</p>
+              <div className="rounded-xl bg-accent-950/40 border border-accent-500/20 p-3 mb-4 space-y-3 animate-fade-in">
+                <p className="text-[11px] text-accent-300 font-semibold">Hayız & nifas düşümü</p>
                 <div className="grid grid-cols-2 gap-3">
                   <NumberField label="Aylık adet günü" value={avgHayzDays} onChange={setAvgHayzDays} min={0} max={15} />
                   <NumberField label="Doğum sayısı" value={birthCount} onChange={setBirthCount} min={0} max={20} />
@@ -323,20 +323,23 @@ export default function BulkAddModal({ onClose, onApply }) {
           <Checkbox checked={includeVitir} onChange={setIncludeVitir}>
             Vitir namazını da dahil et
           </Checkbox>
-          <p className="text-[11px] text-zinc-400 pl-7.5 leading-relaxed">
-            💡 <span className="text-amber-300 font-semibold">Hanefî mezhebine göre</span> Vitir namazı vacip olduğundan kazası kılınmalıdır.
+          <p className="text-[11px] text-zinc-400 pl-7.5 leading-relaxed flex items-start gap-1.5">
+            <Lightbulb size={13} className="mt-[1px] shrink-0 text-accent-400" />
+            <span>
+              <span className="text-accent-300 font-semibold">Hanefî mezhebine göre</span> Vitir namazı vacip olduğundan kazası kılınmalıdır.
+            </span>
           </p>
         </div>
 
         {/* Özet */}
-        <div className="rounded-xl islamic-card p-4 mb-5 space-y-1.5 border border-amber-500/20">
+        <div className="rounded-xl islamic-card p-4 mb-5 space-y-1.5 border border-accent-500/20">
           {calcMode === 'simple' ? (
             <p className="text-xs text-zinc-300">
-              <span className="font-bold text-amber-300">{years}</span> yıl{' '}
-              <span className="font-bold text-amber-300">{months}</span> ay{' '}
-              <span className="font-bold text-amber-300">{days}</span> gün{' '}
+              <span className="font-bold text-accent-300">{years}</span> yıl{' '}
+              <span className="font-bold text-accent-300">{months}</span> ay{' '}
+              <span className="font-bold text-accent-300">{days}</span> gün{' '}
               <span className="text-zinc-500">→</span>{' '}
-              her vakte <span className="font-extrabold text-gold-gradient">{totalDays.toLocaleString('tr-TR')}</span> kaza
+              her vakte <span className="font-extrabold text-brand-gradient">{totalDays.toLocaleString('tr-TR')}</span> kaza
               eklenecek{!includeVitir && ' (Vitir hariç)'}.
             </p>
           ) : (
@@ -367,7 +370,7 @@ export default function BulkAddModal({ onClose, onApply }) {
               )}
               <div className="border-t border-white/[0.08] pt-2 flex items-center justify-between text-xs">
                 <span className="text-zinc-300 font-semibold">Her vakte eklenecek</span>
-                <span className="font-extrabold text-gold-gradient tabular-nums">
+                <span className="font-extrabold text-brand-gradient tabular-nums">
                   {totalDays.toLocaleString('tr-TR')} kaza
                 </span>
               </div>
@@ -379,7 +382,7 @@ export default function BulkAddModal({ onClose, onApply }) {
           type="button"
           onClick={handleApply}
           disabled={totalDays <= 0}
-          className="group relative w-full h-12 rounded-xl font-bold btn-gold-gradient transition-all active:scale-[0.98] disabled:opacity-30 overflow-hidden"
+          className="group relative w-full h-12 rounded-xl font-bold btn-brand-gradient transition-all active:scale-[0.98] disabled:opacity-30 overflow-hidden"
         >
           <span className="relative font-bold">Tümüne Ekle</span>
         </button>

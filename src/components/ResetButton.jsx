@@ -46,8 +46,19 @@ export default function ResetButton({ onConfirm }) {
             </div>
 
             {/* Açıklama */}
+            <p className="text-xs text-zinc-300 mb-2 leading-relaxed">
+              Şunlar kalıcı olarak silinecek:
+            </p>
+            <ul className="text-xs text-zinc-300 mb-3 space-y-1 list-disc pl-5 marker:text-rose-400">
+              <li>Kaza sayaçları ve başlangıç borcu</li>
+              <li>Günlük ilerleme geçmişi</li>
+              <li>Profil ve hesaplama bilgileri (cinsiyet, doğum tarihi vb.)</li>
+            </ul>
+            <p className="text-[11px] text-zinc-400 mb-2 leading-relaxed">
+              Konum ve vakit ayarların korunur.
+            </p>
             <p className="text-xs text-zinc-300 mb-5 leading-relaxed">
-              Tüm kaza sayıları, profil bilgileriniz ve ilerleme geçmişiniz kalıcı olarak silinecek.
+              Silmeden önce <strong className="text-zinc-100">Yedeği indir</strong> ile yedek almanı öneririz.
               <span className="text-rose-400 font-semibold"> Bu işlem geri alınamaz.</span>
             </p>
 

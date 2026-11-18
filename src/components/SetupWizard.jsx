@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
-import { User, UserRound, Calculator, ChevronRight, ChevronLeft, Minus, Plus, Sparkles, BookOpen, CalendarDays } from 'lucide-react'
+import { User, UserRound, Calculator, ChevronRight, ChevronLeft, Minus, Plus, Sparkles, BookOpen, CalendarDays, Lightbulb } from 'lucide-react'
+import RestoreBackupButton from './RestoreBackupButton'
 import { PRAYERS } from '../constants/prayers'
 import { calculateWithGender, buildBulkAddition } from '../utils/prayerCalculations'
 
@@ -34,14 +35,14 @@ function StepperField({ label, value, onChange, min = 0, max = 999, hint }) {
             const v = e.target.value === '' ? min : Number(e.target.value)
             onChange(Math.max(min, Math.min(max, v)))
           }}
-          className="w-full rounded-xl bg-surface-900 border border-white/[0.08] px-2 py-2 text-center text-lg font-bold tabular-nums text-emerald-300 placeholder:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition-all"
+          className="w-full rounded-xl bg-surface-900 border border-white/[0.08] px-2 py-2 text-center text-lg font-bold tabular-nums text-primary-300 placeholder:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-accent-500/40 transition-all"
         />
         <button
           type="button"
           onClick={() => onChange(Math.min(max, value + 1))}
           disabled={value >= max}
           aria-label={`${label} artır`}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 border border-emerald-500/20 text-emerald-300 hover:bg-emerald-500/25 active:scale-[0.93] transition-all disabled:opacity-25"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-500/15 border border-primary-500/20 text-primary-300 hover:bg-primary-500/25 active:scale-[0.93] transition-all disabled:opacity-25"
         >
           <Plus size={14} />
         </button>
@@ -64,7 +65,7 @@ function Checkbox({ checked, onChange, children }) {
           onChange={(e) => onChange(e.target.checked)}
           className="peer sr-only"
         />
-        <div className="h-5 w-5 rounded-md border border-amber-500/30 bg-surface-850 peer-checked:bg-gradient-to-br peer-checked:from-emerald-600 peer-checked:to-amber-600 peer-checked:border-amber-400 transition-all flex items-center justify-center">
+        <div className="h-5 w-5 rounded-md border border-accent-500/30 bg-surface-850 peer-checked:bg-gradient-to-br peer-checked:from-primary-600 peer-checked:to-accent-600 peer-checked:border-accent-400 transition-all flex items-center justify-center">
           {checked && (
             <svg className="w-3.5 h-3.5 text-surface-950 stroke-[3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -72,7 +73,7 @@ function Checkbox({ checked, onChange, children }) {
           )}
         </div>
       </div>
-      <span className="group-hover:text-amber-200 transition-colors">{children}</span>
+      <span className="group-hover:text-accent-200 transition-colors">{children}</span>
     </label>
   )
 }
@@ -134,26 +135,32 @@ export default function SetupWizard({ onComplete }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-950 islamic-pattern overflow-auto">
+    // NOT: 'items-center' + 'overflow' birlikte kullanılırsa, içerik viewport'tan
+    // uzun olduğunda üst kısmı kaydırılamaz şekilde kırpılır (Erkek/Kadın
+    // butonları ekran dışına taşar ve tıklanamaz). Bu yüzden dış kap
+    // 'overflow-y-auto', iç kap 'items-start' + çocukta 'my-auto' kullanır.
+    // Böylece içerik kısa iken ortalanır, uzun iken tepeden itibaren kaydırılır.
+    <div className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden overscroll-contain bg-surface-950 islamic-pattern">
       {/* Dekoratif Işımalar */}
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[550px] h-[400px] bg-emerald-800/[0.12] rounded-full blur-[130px] animate-ambient-glow" />
-        <div className="absolute -bottom-20 -right-20 w-[350px] h-[350px] bg-purple-900/[0.12] rounded-full blur-[110px] animate-ambient-glow" style={{ animationDelay: '2s' }} />
+      <div className="pointer-events-none fixed inset-0" aria-hidden="true">
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[550px] h-[400px] bg-primary-800/[0.12] rounded-full blur-[130px] animate-ambient-glow" />
+        <div className="absolute -bottom-20 -right-20 w-[350px] h-[350px] bg-accent-900/[0.12] rounded-full blur-[110px] animate-ambient-glow" style={{ animationDelay: '2s' }} />
       </div>
 
-      <div className="relative z-10 w-full max-w-md mx-auto px-4 py-8">
+      <div className="relative z-10 flex min-h-full w-full items-start justify-center">
+        <div className="w-full max-w-md mx-auto px-4 py-8 my-auto">
         {/* ═══════ ADIM 1: Karşılama ═══════ */}
         {step === 1 && (
           <div className="animate-fade-in">
             {/* Logo / Başlık */}
             <div className="text-center mb-8">
-              <p className="font-serif text-amber-300/80 text-sm tracking-wide mb-2 select-none">
+              <p className="font-serif text-accent-300/80 text-sm tracking-wide mb-2 select-none">
                 بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
               </p>
-              <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-900/40 via-purple-900/40 to-amber-900/30 border border-amber-500/30 shadow-lg mb-4">
-                <Sparkles size={28} className="text-amber-400" />
+              <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-900/40 via-accent-900/40 to-accent-900/30 border border-accent-500/30 shadow-lg mb-4">
+                <Sparkles size={28} className="text-accent-400" />
               </div>
-              <h1 className="text-2xl font-black text-royal-gradient mb-2 tracking-tight">Kaza Namazı Takip</h1>
+              <h1 className="text-2xl font-black text-brand-gradient mb-2 tracking-tight">Kaza Namazı Takip</h1>
               <p className="text-xs text-zinc-400 leading-relaxed max-w-xs mx-auto">
                 Kaza namazı borcunuzu hesaplayın veya kendiniz girerek hemen takibe başlayın.
               </p>
@@ -164,37 +171,40 @@ export default function SetupWizard({ onComplete }) {
               <button
                 type="button"
                 onClick={() => { setMode('manual'); setStep(2) }}
-                className="group w-full rounded-2xl islamic-card p-4.5 text-left transition-all hover:scale-[0.988] active:scale-[0.975] border border-emerald-500/20"
+                className="group w-full rounded-2xl islamic-card p-4.5 text-left transition-all hover:scale-[0.988] active:scale-[0.975] border border-primary-500/20"
               >
                 <div className="flex items-center gap-3.5">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-900/50 to-teal-900/40 border border-emerald-500/30">
-                    <BookOpen size={22} className="text-emerald-300" />
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-900/50 to-accent-900/40 border border-primary-500/30">
+                    <BookOpen size={22} className="text-primary-300" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-zinc-100 text-base">Kaza sayımı biliyorum</p>
                     <p className="text-xs text-zinc-400 mt-0.5">Her vakit için kaza sayılarını kendin gir</p>
                   </div>
-                  <ChevronRight size={18} className="text-zinc-500 group-hover:text-amber-400 transition-colors" />
+                  <ChevronRight size={18} className="text-zinc-500 group-hover:text-accent-400 transition-colors" />
                 </div>
               </button>
 
               <button
                 type="button"
                 onClick={() => { setMode('calculate'); setStep(2) }}
-                className="group w-full rounded-2xl islamic-card p-4.5 text-left transition-all hover:scale-[0.988] active:scale-[0.975] border border-purple-500/20"
+                className="group w-full rounded-2xl islamic-card p-4.5 text-left transition-all hover:scale-[0.988] active:scale-[0.975] border border-accent-500/20"
               >
                 <div className="flex items-center gap-3.5">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-900/50 to-violet-900/40 border border-purple-500/30">
-                    <Calculator size={22} className="text-purple-300" />
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-accent-900/50 to-accent-900/40 border border-accent-500/30">
+                    <Calculator size={22} className="text-accent-300" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-zinc-100 text-base">Bilmiyorum, hesaplat</p>
                     <p className="text-xs text-zinc-400 mt-0.5">Yaş ve fıkhî kurallara göre otomatik hesapla</p>
                   </div>
-                  <ChevronRight size={18} className="text-zinc-500 group-hover:text-amber-400 transition-colors" />
+                  <ChevronRight size={18} className="text-zinc-500 group-hover:text-accent-400 transition-colors" />
                 </div>
               </button>
             </div>
+
+            {/* Yeni telefon / yeniden kurulum: yedekten devam et (UC-03) */}
+            <RestoreBackupButton variant="link" />
           </div>
         )}
 
@@ -241,12 +251,12 @@ export default function SetupWizard({ onComplete }) {
                         value={manualCounts[prayer.id] || ''}
                         onFocus={(e) => e.target.select()}
                         onChange={(e) => updateManual(prayer.id, e.target.value === '' ? 0 : Number(e.target.value))}
-                        className="w-20 rounded-lg bg-surface-900 border border-white/[0.08] px-2 py-1.5 text-center text-base font-bold tabular-nums text-emerald-300 placeholder:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition-all"
+                        className="w-20 rounded-lg bg-surface-900 border border-white/[0.08] px-2 py-1.5 text-center text-base font-bold tabular-nums text-primary-300 placeholder:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-accent-500/40 transition-all"
                       />
                       <button
                         type="button"
                         onClick={() => updateManual(prayer.id, manualCounts[prayer.id] + 1)}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 active:scale-[0.93] transition-all"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-500/20 border border-primary-500/30 text-primary-300 active:scale-[0.93] transition-all"
                         aria-label={`${prayer.name} artır`}
                       >
                         <Plus size={12} />
@@ -261,7 +271,7 @@ export default function SetupWizard({ onComplete }) {
               type="button"
               onClick={() => setStep(3)}
               disabled={finalTotal <= 0}
-              className="group relative w-full h-12 rounded-xl font-bold btn-gold-gradient transition-all active:scale-[0.98] disabled:opacity-30 overflow-hidden"
+              className="group relative w-full h-12 rounded-xl font-bold btn-brand-gradient transition-all active:scale-[0.98] disabled:opacity-30 overflow-hidden"
             >
               <span className="relative font-bold flex items-center justify-center gap-2">
                 Devam Et <ChevronRight size={16} />
@@ -295,7 +305,7 @@ export default function SetupWizard({ onComplete }) {
                   onClick={() => setGender('male')}
                   className={`flex items-center justify-center gap-2 h-12 rounded-xl font-bold transition-all active:scale-[0.97] ${
                     gender === 'male'
-                      ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300 border'
+                      ? 'bg-primary-500/20 border-primary-500/40 text-primary-300 border'
                       : 'bg-surface-850 border border-white/[0.06] text-zinc-400 hover:bg-surface-800'
                   }`}
                 >
@@ -307,7 +317,7 @@ export default function SetupWizard({ onComplete }) {
                   onClick={() => setGender('female')}
                   className={`flex items-center justify-center gap-2 h-12 rounded-xl font-bold transition-all active:scale-[0.97] ${
                     gender === 'female'
-                      ? 'bg-purple-500/20 border-purple-500/40 text-purple-300 border'
+                      ? 'bg-accent-500/20 border-accent-500/40 text-accent-300 border'
                       : 'bg-surface-850 border border-white/[0.06] text-zinc-400 hover:bg-surface-800'
                   }`}
                 >
@@ -329,7 +339,7 @@ export default function SetupWizard({ onComplete }) {
                   value={birthDate}
                   onChange={(e) => setBirthDate(e.target.value)}
                   max={new Date().toISOString().split('T')[0]}
-                  className="w-full rounded-xl bg-surface-900 border border-white/[0.08] pl-10 pr-3 py-2.5 text-base font-semibold text-zinc-100 focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition-all [color-scheme:dark]"
+                  className="w-full rounded-xl bg-surface-900 border border-white/[0.08] pl-10 pr-3 py-2.5 text-base font-semibold text-zinc-100 focus:outline-none focus:ring-2 focus:ring-accent-500/40 transition-all [color-scheme:dark]"
                 />
               </div>
               <p className="text-[11px] text-zinc-400 mt-1">Güncel tarih otomatik alınır, sadece doğum tarihinizi seçin</p>
@@ -373,8 +383,8 @@ export default function SetupWizard({ onComplete }) {
 
             {/* Kadına Özel Düşümler */}
             {gender === 'female' && (
-              <div className="rounded-xl bg-purple-950/40 border border-purple-500/20 p-4 mb-4 space-y-3 animate-fade-in">
-                <p className="text-xs text-purple-300 font-semibold mb-1">
+              <div className="rounded-xl bg-accent-950/40 border border-accent-500/20 p-4 mb-4 space-y-3 animate-fade-in">
+                <p className="text-xs text-accent-300 font-semibold mb-1">
                   Kadınlara özel — hayız ve nifas günleri düşülür
                 </p>
                 <StepperField
@@ -410,14 +420,17 @@ export default function SetupWizard({ onComplete }) {
               <Checkbox checked={includeVitir} onChange={setIncludeVitir}>
                 Vitir namazını da dahil et
               </Checkbox>
-              <p className="text-[11px] text-zinc-400 pl-7.5 leading-relaxed">
-                💡 <span className="text-amber-300 font-semibold">Hanefî mezhebine göre</span> Vitir namazı vacip olduğu için kazası da kılınmalıdır.
+              <p className="text-[11px] text-zinc-400 pl-7.5 leading-relaxed flex items-start gap-1.5">
+                <Lightbulb size={13} className="mt-[1px] shrink-0 text-accent-400" />
+                <span>
+                  <span className="text-accent-300 font-semibold">Hanefî mezhebine göre</span> Vitir namazı vacip olduğu için kazası da kılınmalıdır.
+                </span>
               </p>
             </div>
 
             {/* Hesaplama Özeti */}
             {birthDate && (
-              <div className="rounded-xl islamic-card p-4 mb-5 space-y-1.5 border border-amber-500/20">
+              <div className="rounded-xl islamic-card p-4 mb-5 space-y-1.5 border border-accent-500/20">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-zinc-400">Namaz borcu süresi</span>
                   <span className="font-bold text-zinc-100 tabular-nums">
@@ -444,7 +457,7 @@ export default function SetupWizard({ onComplete }) {
                 )}
                 <div className="border-t border-white/[0.08] pt-2 flex items-center justify-between text-sm">
                   <span className="text-zinc-300 font-semibold">Her vakte eklenecek</span>
-                  <span className="font-black text-gold-gradient text-base tabular-nums">
+                  <span className="font-black text-brand-gradient text-base tabular-nums">
                     {calcResult.totalDays.toLocaleString('tr-TR')} kaza
                   </span>
                 </div>
@@ -455,7 +468,7 @@ export default function SetupWizard({ onComplete }) {
               type="button"
               onClick={() => setStep(3)}
               disabled={calcResult.totalDays <= 0}
-              className="group relative w-full h-12 rounded-xl font-bold btn-gold-gradient transition-all active:scale-[0.98] disabled:opacity-30 overflow-hidden"
+              className="group relative w-full h-12 rounded-xl font-bold btn-brand-gradient transition-all active:scale-[0.98] disabled:opacity-30 overflow-hidden"
             >
               <span className="relative font-bold flex items-center justify-center gap-2">
                 Devam Et <ChevronRight size={16} />
@@ -492,7 +505,7 @@ export default function SetupWizard({ onComplete }) {
                       </div>
                       <span className="font-semibold text-zinc-200 text-sm">{prayer.name}</span>
                     </div>
-                    <span className={`text-xl font-extrabold tabular-nums ${count > 0 ? (prayer.isVitir ? 'text-gold-gradient' : 'text-emerald-300') : 'text-zinc-600'}`}>
+                    <span className={`text-xl font-extrabold tabular-nums ${count > 0 ? (prayer.isVitir ? 'text-brand-gradient' : 'text-primary-300') : 'text-zinc-600'}`}>
                       {count.toLocaleString('tr-TR')}
                     </span>
                   </div>
@@ -500,10 +513,10 @@ export default function SetupWizard({ onComplete }) {
               })}
             </div>
 
-            <div className="rounded-xl islamic-card-emerald p-4 mb-6 border border-emerald-500/30">
+            <div className="rounded-xl islamic-card-emerald p-4 mb-6 border border-primary-500/30">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-emerald-200">Toplam Kaza Borcu</span>
-                <span className="text-2xl font-black text-gold-gradient tabular-nums">
+                <span className="text-sm font-semibold text-primary-200">Toplam Kaza Borcu</span>
+                <span className="text-2xl font-black text-brand-gradient tabular-nums">
                   {finalTotal.toLocaleString('tr-TR')}
                 </span>
               </div>
@@ -513,7 +526,7 @@ export default function SetupWizard({ onComplete }) {
               type="button"
               onClick={handleFinish}
               disabled={finalTotal <= 0}
-              className="group relative w-full h-13 rounded-xl font-bold btn-gold-gradient transition-all active:scale-[0.98] disabled:opacity-30 overflow-hidden"
+              className="group relative w-full h-13 rounded-xl font-bold btn-brand-gradient transition-all active:scale-[0.98] disabled:opacity-30 overflow-hidden"
             >
               <span className="relative font-bold text-base flex items-center justify-center gap-2">
                 <Sparkles size={18} />
@@ -530,13 +543,14 @@ export default function SetupWizard({ onComplete }) {
               key={s}
               className={`h-1.5 rounded-full transition-all duration-300 ${
                 s === step
-                  ? 'w-8 bg-gradient-to-r from-amber-400 to-emerald-400'
+                  ? 'w-8 bg-gradient-to-r from-accent-400 to-primary-400'
                   : s < step
-                    ? 'w-4 bg-emerald-500/30'
+                    ? 'w-4 bg-primary-500/30'
                     : 'w-4 bg-surface-800'
               }`}
             />
           ))}
+        </div>
         </div>
       </div>
     </div>
