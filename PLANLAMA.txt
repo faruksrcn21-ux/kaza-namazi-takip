@@ -1,0 +1,487 @@
+================================================================================
+ KAZA NAMAZI TAKİP — GELİŞTİRME PLANLAMASI
+ Tarih: 19.10.2026 | Güncelleme: 19.11.2026 | Durum: Faz 0-3 + 2.5 TAMAM, K-16 renk sistemi uygulandı · Sıradaki: Faz 4 (ayrı onayla) / Faz 5
+ Gereksinimler (SRS): docs/GEREKSINIMLER.md
+================================================================================
+
+--------------------------------------------------------------------------------
+0. SABİT KURALLAR
+--------------------------------------------------------------------------------
+ * CANLI UYGULAMA (https://kaza-namazi-takip-uyg.vercel.app/) HİÇ DEĞİŞMEYECEK.
+   Bu süreçte deploy, push veya canlıya commit YAPILMAYACAK.
+ * Çalışma branch'i: feat/summary-phase (main'den açıldı, main'de değişiklik YOK).
+ * Mevcut 10 değiştirilmiş dosya + UndoToast.jsx branch üzerinde
+   COMMIT EDİLMEDEN duruyor; yeni özelliklerle birlikte commit'lenecek.
+ * Git komutları (commit/push) yalnızca açık onay ile çalıştırılacak.
+ * Her geliştirme adımından önce karar sorulacak, sonuç buraya yazılacak.
+
+--------------------------------------------------------------------------------
+0.1 KARAR GÜNLÜĞÜ (19.10.2026 — bu oturumda alınan kararlar)
+--------------------------------------------------------------------------------
+ K-01  Çalışma alanı  : Yeni branch feat/summary-phase. main'e dokunulmaz.
+ K-02  Mevcut diff    : Branch'te bırakılır, ayrı commit YAPILMAZ; yeni
+                       özelliklerle birlikte commit'lenecek.
+ K-03  Veri modeli   : GÜNLÜK KAZA MİKTARI + GÜNLÜK KALAN BORÇ (ikisi birden)
+                       + vakit bazlı kırılım (6 vakit) + toplu ekleme bayrağı.
+                       Saat detayı YOK (gereksiz fazlalık).
+ K-04  Saklama       : SINIRSIZ — tüm günlük kayıtlar tutulur (~365 KB / 10 yıl).
+ K-05  Kayıt mantığı : ANLIK GÜNCELLEME. Her sayaç değişiminde bugünün kaydı
+                       güncellenir; gün değişince yeni kayıt açılır.
+ K-06  Toplu ekleme : Günlük kayda YAZILIR ve ÖZEL İŞARETLENİR (bulk=true).
+                       Veri katmanında ayrı kova tutulur; grafikte ayrı renk YOKTUR (K-15: tek renk toplam sütun).
+ K-07  Ekran yapısı  : ALT TAB BAR — 3 sekme: Takip | Özet | Ayarlar.
+                       (Vakitler ayrı sekme DEĞİL; vakit hesabı Ayarlar içinde.)
+ K-08  Özet ekranı  : "Günlük | Haftalık | Aylık" seçici + altında seçili
+                       periyodun SÜTUN GRAFİĞİ + vakit dağılımı (yatay çubuk)
+                       + karşılaştırma + tahmini bitiş. Streak/rozet YOK.
+ K-09  Karşılaştırma: SADECE yön + yüzde (↑ %20 / ↓ %15). Detay yok.
+ K-10  Tahmini bitiş: ORTALAMA HIZ (ana) + EN İYİ HIZ (iyimser alt metin).
+ K-11  Vakit dağılımı: YATAY ÇUBUKLAR (isim + sayı + yüzde).
+ K-12  Ayarlar (Faz1): Veri sıfırlama + konum seçimi (İL LİSTESİ + GPS).
+                       Bildirim bölümü YOK (Faz 3'te eklenir).
+ K-13  Konum        : İL LİSTESİ (81 il) + GPS BUTONU birlikte. Manuel
+                       koordinat Faz 2'de ayarlara eklenir.
+ K-14  Grafik kütüphane: ELLE SVG (0 KB ek bağımlılık).
+ K-15  Grafik tek renk (20.10.2026): kaza/bulk görsel ayrımı kaldırıldı.
+                       Veri katmanında kaza/bulk kovaları ayrı tutulur;
+                       grafikte her sütun dönem TOPLAMINI tek zümrüt
+                       sütunla gösterir. Lejant tek kalemdir.
+ K-16  Renk sistemi (19.11.2026): YEŞİL + MOR birlikte, iki net rol.
+                       Turkuaz (jade) ara rengi KALDIRILDI.
+                       - Yeşil (primary) = eda & ilerleme: −1/−5 (kılındı)
+                         butonları, ilerleme, grafik, olumlu durumlar.
+                       - Mor (accent) = kimlik & yapı: aktif sekme/seçim,
+                         kilit, rozet, ikon zeminleri, çerçeveler, +1/+5.
+                       - İmza gradyanı yeşil→mor (sRGB) yalnızca öne çıkan
+                         yerlerde: başlık, yüzde, ilerleme çubuğu, ana buton.
+                         OKLCH geçişi araya gök mavisi soktuğu için kullanılmaz.
+                       - Vakit kartları gün boyu yeşilden mora akar:
+                         Sabah/Öğle yeşil → İkindi geçiş → Akşam/Yatsı/Vitir mor.
+                       - Yüzeyler hafif mor tonlu koyu (#08070d tabanı).
+                       - Tonlar yalnızca tailwind.config.js'te primary/accent
+                         skalalarından yönetilir. Grafik K-15 gereği tek yeşil.
+ K-17  Yön (19.11.2026): "Daha güzel" hedefi = görsel yenileme + yenilikler
+                       birlikte; yenilikler K-16 renk sistemiyle devam eder.
+ K-18  Faz 2.5 (19.11.2026): Faz 3'ten ONCE temel saglamlastirma yapildi
+                       (yedekleme + migrasyon + npm test + tek yerde sifirlama).
+ K-19  Sifirlama kapsami (varsayilan, degistirilebilir): sayaclar, baslangic,
+                       gecmis ve profil silinir; KONUM ve VAKIT SAPMA ayarlari
+                       KORUNUR. Sifirlama yalnizca Ayarlar'da.
+ K-20  Yedek bicimi (varsayilan): JSON DOSYA. Mobilde paylasim menusu
+                       (destekleniyorsa), digerlerinde indirme. Panoya kopyalama yok.
+                       Geri yukleme Ayarlar'da + kurulum ekraninda (yeni telefon).
+ K-21  Fontlar (19.11.2026): Google Fonts KALDIRILDI; Plus Jakarta Sans
+                       (degisken) + Amiri pakete gomuldu (@fontsource), yalniz
+                       latin/latin-ext (+ Amiri arapca). PWA onbellegine girer.
+ K-22  Bildirim kapsami (Faz 3): 5 farz vakit (varsayilan acik) + 3 nafile
+                       (varsayilan kapali). Vitir icin ayri hatirlatma YOK.
+                       "Ne zaman": vaktinde / 5 / 10 / 15 / 30 dk once.
+                       Bildirime dokununca: Takip + ilgili vakit karti vurgulanir.
+                       Bildirimden SAYAC DEGISTIRME YOK (D9/FR-BLD-05 ertelendi):
+                       yanlislikla kaza dusme riski; ileride acik onayla.
+ K-23  .ics: 7 veya 30 gunluk, secili vakitler + "dk once" alarmi (VALARM).
+                       Bildirim desteklenmese/izin reddedilse de kullanilabilir.
+ K-24  Hatirlatma ayarlari yedege dahil (reminders alani); eski yedekler gecerli.
+
+--------------------------------------------------------------------------------
+1. MEVCUT MİMARİNİN GERÇEK HÂLİ
+--------------------------------------------------------------------------------
+ Veri modeli      : counts[prayerId] = sayı. TARİH / TARİHÇE YOK.
+                     (src/constants/prayers.js, src/hooks/useLocalStorage.js)
+ Depolama         : localStorage. Tek anahtar: kaza-namazi-takip-v1
+ Ekran            : TEK ekran (src/App.jsx). Router yok, tab bar yok.
+ PWA              : vite-plugin-pwa, registerType autoUpdate, workbox precache.
+                     ÖZEL Service Worker YOK. -> push için injectManifest gerekir.
+ Grafik           : Hiç grafik kütüphanesi yok. Elle SVG de mümkün.
+ Vakit hesabı     : YOK.
+ Konum            : YOK (şehir listesi / GPS / manuel lat-lon yok).
+ Analitik         : @vercel/analytics kurulu (ücretsiz event tracking).
+ Test             : CDP tabanlı regresyon testi mevcut (temp klasöründe).
+
+--------------------------------------------------------------------------------
+2. ÖNERİLEN MİMARİ
+--------------------------------------------------------------------------------
+
+A) GEÇMİŞ VERİ KATMANI  (kaza-namazi-takip-gecmis-v1)
+   Günlük kayıt formatı — her gün bir anahtar:
+     "YYYY-MM-DD": {
+       kaza:  { sabah: 3, ogle: 1, ikindi: 0, aksam: 2, yatsi: 0, vitir: 1 },
+       bulk:  { sabah: 5000, ... },      // toplu ekleme ayrı işaretli
+       kalan: { sabah: 120, ... },       // gün sonu kalan borç anlık görüntüsü
+       toplamKaza: 7,
+       toplamBulk: 5000,
+       toplamKalan: 120
+     }
+   - Mevcut 'counts' bozulmadan korunur. İlk kurulumda geçmiş boş başlar.
+   - Her sayaç değişimi (PrayerCard +1/-1/+5/-5, BulkAddModal, Undo)
+     ilgili günün kaza/bulk kaydını günceller.
+   - Kalan borç anlık görüntüsü her günün sonunda yazılır.
+   - Grafikler 'kaza' + 'bulk' toplam olarak gösterir (K-15).
+
+B) EKRAN YAPISI  — 3 sekmeli alt tab bar
+     [ Takip ]  [ Özet ]  [ Ayarlar ]
+   - Takip  : mevcut ekran (ProgressHeader, vakit kartları, toplu hesapla)
+   - Özet   : yeni ekran (Faz 1)
+   - Ayarlar: sıfırlama + konum seçimi (Faz 1) -> vakit hesabı (Faz 2)
+   NOT: 'Vakitler' ayrı sekme DEĞİL; vakit hesabı Ayarlar sekmesi içinde.
+
+C) VAKİTLER EKRANI
+   - 5 vakit (Diyanet) + Vitir + Nafile saatleri
+   - Diyanet = adhan kütüphanesindeki CalculationMethod.Turkey()
+   - Nafile (sahih, Ehl-i Sünnet): Teheccüd (gecenin son üçte biri),
+     Kuşluk/Duhâ (güneş doğuşu +50 dk), Evvâbin (Akşam +20 dk)
+     NOT: İstikamet ve Evşab KALDIRILDI (sahih nafile namazı değildir).
+   - Konum: Türkiye 81 il listesi + "konumumu kullan" + manuel koordinat
+   - Şehir başına saat dilimi saklanir; saatler Intl ile formatlanir.
+   - Gece yarisi gecisinde (00:00) otomatik yeniden hesap.
+
+D) ÖZET EKRANI (ASIL HEDEF — Faz 1)
+   - Üstte "Günlük | Haftalık | Aylık" seçici
+   - Seçili periyodun SÜTUN GRAFİĞİ (elle SVG)
+       * TEK RENK: dönem toplamı tek zümrüt sütunla gösterilir (K-15)
+       her sütun dönem TOPLAMINI tek zümrüt sütunla gösterir (K-15); lejant tek kalemdir
+   - VAKİT DAĞILIMI: yatay çubuklar (isim + sayı + yüzde)
+   - KARŞILAŞTIRMA: sadece yön + yüzde (önceki döneme göre)
+   - TAHMİNİ BİTİŞ: ortalama hız (ana) + en iyi hız (alt metin)
+   - Seri, rozet, günlük streak kartı YOK
+   - Grafik: ELLE SVG (0 KB ek bağımlılık, offline, tam tasarim kontrolu)
+
+E) BILDIRIM MIMARISI  -> 3 katman (ayrintili aciklama bolum 3'te)
+
+F) ASAMA PLANI (her asama bagimsiz test edilebilir)
+ Faz 0 : Gecmis veri modeli + 3 sekmeli tab bar iskeleti
+ Faz 1 : Ozet ekrani (gun/hafta/ay sutun grafikleri + vakit dagilimi
+         + karsilastirma + tahmini bitis) + Ayarlar (sifirlama + konum)
+ Faz 2 : Vakit hesaplama (adhan + konum) — Ayarlar icinde
+ Faz 3 : Bildirimler (uygulama acikken) + 5 vakit & nafile saatleri
+ Faz 4 : Arka plan bildirimi (Web Push / .ics)
+ Faz 5 : Hedef, seri, rozet, yedekleme, paylasim
+
+
+--------------------------------------------------------------------------------
+3. BILDIRIM MIMARISI  (CEVAP: EVET, UYGULAMA KAPALIYKEN DE VERILEBILIR)
+--------------------------------------------------------------------------------
+ SORU: "Bildirimi veremiyor muyuz uygulama kapaliyken?"
+ CEVAP: VERILEBILIR. Ama yontem degisir. Mobil web'de iki farkli sey vardir:
+
+   (1) SAYFA ACIK / ARIK PLANDA (foreground)
+       = Tarayici Notification API'si + setTimeout.
+       Sunucu gerekmez. Bildirim aninda, uygulama ekrandayken calisir.
+       TIKLANINCA: ilgili vakit kartina gidilir ve sayac tek dokunusla artirilir.
+
+   (2) SAYFA KAPALI (background)  --> GERCEK PUSH GEREKIR
+       = Web Push (VAPID) + bir sunucu.
+       Telefona "abone ol" (subscribe) yapilir. Sunucu, vakit gelince
+       push mesaji gonderir. Telefo interneti olsa da olmasa da (asagidaki
+       not) teslim edilir.
+
+   DIYANET ILE AYNI HESAP SUNUCUDA YAPILAMAZ
+   Adhan hesabini sunucuda degil, KULLANICININ CIHAZINDA yapip vakit
+   zamanlarini bir kere sunucuya kaydediyoruz. Sunucu sadece "bu saatte
+   5 vakit bildirimi gonder" diye zamanlanmis is yapacak. Boylece
+   sunucu ucuz ve guvenilir kalir, hesap hatalari olmaz.
+
+   ------------------------------------------------------------------
+   KATMAN 1 - KULLANICI AYARINDAN "NAMAZ VAKTI" TANI (5 vakit)
+   ------------------------------------------------------------------
+   Kullanici Ayarlar ekraninda secim yapar:
+     [x] Sabah  [x] OgIe  [x] Ikindi  [x] Aksam  [x] Yatsi
+   Secilen her vakit icin, o gunku vakit saati hesaplanir ve push
+   aboneliği olusturulur (endpoint + keys sunucuda saklanir).
+   Bildirim icerigi ornegin:
+     "OgIe vakti 13:05"  /  "Yatsi vakti - 20 dk kaldi"
+   Bildirime TIKLANINCA: uygulama acilir, ilgili vakit karti vurgulanir
+   ve sayac tek dokunusla +1 yapilabilir.
+
+   ------------------------------------------------------------------
+   KATMAN 2 - NAFILE VAKIT BILDIRIMI
+   ------------------------------------------------------------------
+   Kullanici Ayarlar'da hangi nafileyi istedigini secir:
+     [ ] Teheccud (gecenin son ucte biri)
+     [ ] Kusluk / Duha (gunes dogusu + 50 dk)
+     [ ] Evvabin (Aksam + 20 dk)
+   (Yalnizca sahih nafile namazlar; Istikamet/Evsab secenek degildir.)
+   Secilen nafile icin ayrica vakit hesaplanir ve bildirim planlanir.
+   Ornek: "Teheccud vakti 02:41 - kaza namazin icin uygun saat".
+
+   ------------------------------------------------------------------
+   KATMAN 3 - SUNUCUSUZ / YEDEK YOL: .ics TAKVIM DOSYASI
+   ------------------------------------------------------------------
+   Istemci tarafinda uretilir, sunucu YOK, veri disari cikmaz.
+   Kullanici "Takvime ekle" derse, o gunun 5 vakti + secili nafile
+   icin bir .ics dosyasi (VALARM) indirilir.
+   Telefonun kendi takvimi alarmi devralir -> uygulama kapali olsa bile
+   telefonun kendi bildirimi gelir. iOS dahil HER YERDE calisir.
+   Bu, Web Push'a gore daha guvenilir ama tek seferlik/gunluk yenileme gerekir.
+
+   ------------------------------------------------------------------
+   KATMAN 4 - WEB PUSH SUNUCUSU (Vercel serverless)
+   ------------------------------------------------------------------
+   - Vercel'de bir serverless function + VAPID anahtarlari.
+   - Push endpoint'leri ve abonelik bilgisi bir depoda tutulur.
+   - Zamanlanmis is: her gece yarisi ertesi gunun vakit saatleri hesaplanir
+     ve push gonderilir. (Gundelik, uygulama hic acilmasa da)
+   - Not: Vercel Hobby planinda cron isleri sinirli olabilir ->
+     alternatif: harici bir cron (cron-job.org) GET istegi atar.
+
+   ------------------------------------------------------------------
+   GERCEKCI KISITLAMALAR (soz vermeden once bilinmeli)
+   ------------------------------------------------------------------
+   1. iOS'ta Web Push SADECE uygulama ana ekrana eklenmis PWA iken calisir.
+      "Safari'de ac" halinde calismaz. Bu yuzden .ics yolu olmazsa olmaz.
+   2. Bildirim izni ilk acilista istenir; reddedilirse geri alinamaz
+      (tarayici ayarindan degistirilmeli). Kullanicidan "izin ver" diye
+      isteyen bir onboarding ekrani gerekir.
+   3. Periodic Background Sync sadece Chrome'da var, iOS'ta YOK.
+   4. "Bildirim sayacini otomatik artir" -> supheli/kaza riski ->
+      varsayilan KAPALI, kullanicinin acikca onaylamasi gerekir.
+   5. Sunucu maliyeti: kullanici sayisi artarsa Vercel function + DB
+      maliyeti devreye girer. Kucuk olculu uygulama icin bedava kalir.
+
+   ------------------------------------------------------------------
+   TAVSIYE (BENIM ONERIM)
+   ------------------------------------------------------------------
+   Faz 3'te: Katman 1 + Katman 2 (uygulama acikken aninda bildirim)
+             + Katman 3 (.ics)  -> SUNUCUSUZ, risk sifir, hemen calisir.
+   Faz 4'te: Katman 4 (Web Push) -> ancak ayrica onay ile,
+             canliya dokunmadan, ayri bir deploy hedefi deneriz.
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+3B. "ARKA PLANDA IZIN + WIDGET GIBI CALISMA" — TEKNİK GERÇEK
+--------------------------------------------------------------------------------
+ SORU: "Açık kalması için arka planda izin istesek, arka planda çalıştırsak,
+       bildirim sistemini widget gibi de yapabilir miyiz?"
+
+ CEVAP: Widget gibi bir yapı web'de MÜMKÜN DEĞİL, ama hedefe en yakın
+        çözüm şu: Push + Service Worker + Bildirim Etkileşimi.
+
+ NEDEN WIDGET OLMAZ:
+ - Ana ekran widget'ı OS/native bir bileşendir. Bir web sitesi/iş web
+   uygulaması widget üretemez. (iOS 26'da "web app widget" diye bir şey
+   YOK; WebKit'in kendi blogunda listelenen yeni web yetenekleri arasında
+   widget desteği yer almıyor.)
+ - PWA manifest'inde bir widget bildirimi yoktur. Bildirimlerin
+   "ana ekranda sabitlenmiş kart" gibi davranması icin yapılabilecek sey:
+   Bildirim actions (bildirime "Sabahı ekle" gibi buton koymak) + Badging
+   (ikonun uzerine kalan borcu yazma).
+
+ WEB'DE ARKA PLANDA CALISMANIN 3 YOLU (teknik olarak dogru siniflandirma):
+   YOL A - Service Worker + Web Push (GERCEK ARKA PLAN)
+     Telefo kapaliyken bile gelir. Sunucu (VAPID) gerektirir.
+     iOS'ta SADECE ana ekrana eklenmis web app icin (iOS 16.4+).
+     -> BIZIM ANA HEDEFIMIZ BU.
+   YOL B - Declarative Web Push (iOS 18.4+ / macOS 15.5+)
+     Service worker'a GEREK YOK. Sunucu, bildirimin icerigini HTTP
+     basliginda hazir JSON olarak gonderir; tarayici gosterir.
+     Daha az pil, daha cok gizlilik. Bizim icin avantaji: custom SW
+     yazmaya gerek kalmaz -> mevcut vite-plugin-pwa yapisi bozulmaz.
+     Dezavantaj: icerigi sunucu tarafinda hazirlamak gerekir (baska bir
+     yandan zaten saatleri sunucuda kaydedecegiz, sorun degil).
+   YOL C - Periodic Background Sync (SADECE CHROME/ANDROID)
+     "widget gibi arka planda calis" fikrine en yakin sey. Service
+     worker periyodik olarak uyanir. iOS'ta YOK. Guvenilirligi dusuk
+     (tarayici belirledigi araliklar, batarya izleyebilir).
+     -> Bizim icin opsiyonel, Chromium kullanicilar icin.
+
+ "BILDIRIM IZNINU ARKA PLANDA ALMA" HAKKINDA:
+   Bildirim izni SADECE kullanicinin dokunmasina (user gesture) bagli
+   olarak istenebilir. Arka planda "kendiliğinden izin isteme" diye bir
+   sey YOKTUR. Yani once kullanicinin Ayarlar'da "Namaz vakti
+   bildirimlerini aç" butonuna basmasi gerekir (bizim tasarimimiz), sonra
+   tarayici izin penceresini gosterir. Arka planda izinsiz bildirim
+   gondermek mumkun degildir ve denemek de kullanici guvenini zedeler.
+   -> Bu bir "kisit" degil, "dogru UX akisi"dir.
+
+ SONUC / PLAN ETKIISI:
+   Bildirim mimarisi şu sekilde netlestirildi:
+     - Faz 3: Foreground bildirim + .ics (sunucusuz, aninda calisir)
+     - Faz 4: Web Push (Yol A + Yol B birlikte: standart push + declarative
+             push fallback). Sunucu tarafi Vercel serverless.
+     - Bildirim etkileşimi: bildirimde butonlar ("Sabahı +1 ekle"),
+       tiklayinca uygulama acilir ve ilgili vakit vurgulanir.
+     - Badge: kalan borcu ana ekran ikonunda goster (Badging API,
+       iOS 16.4+ Home Screen app'lerde calisir).
+     - Widget: yapilamaz -> onun yerine "ana ekrana sabitlenmis hizli
+       erisim sayfasi" (start_url ile /ozet ?veya koyu tema) + badge.
+
+4. EK ÖZELLIK ÖNERILERIM (sen beğenirsen ekleyelim)
+--------------------------------------------------------------------------------
+   1. Günlük kaza hedefi (örn. "günde 5 vakit") + gün sonu "hedefi tuttun mu?"
+   2. Seri (streak) & rozetler (7 gün / 30 gün / 1.000 kaza)
+   3. Yedekleme / geri yükleme (JSON dosya + pano kopyala)
+   4. "Nafile niyetiyle kaza" ayrı sayaç + istatistik
+   5. Bildirimden tek dokunuşla sayacı artırma (onaylı)
+   6. PWA badge — kalan borcu ana ekran ikonunda göster
+   7. Özet paylaşımı — Web Share API ile ilerleme kartı
+   8. Hicri geri sayım — Ramazan / Kurban / Bayram (hijriDate.js ile bedava)
+   9. Kaza saati dağılımı — hangi saatlerde kaza yapıyorsun analizi
+  10. Ses + titreşim, sessiz saat aralığı
+  11. Vakit sapması uyarısı — "5 dk geciktin" hatırlatması
+  12. İstatistik: en çok kaza yaptığın vakit / en verimli gün
+  13. Vakit sapması ayarı (manuel +/- dk) — Diyanet farkını kapatır
+  14. Kaza hedefi & "bugünün önerisi" (hangi vakitten ne kadar kaldı)
+
+
+--------------------------------------------------------------------------------
+5. ASAMA PLANI (detay)
+--------------------------------------------------------------------------------
+ Faz 0 - GECMIS VERI MODELI + TAB BAR ISKELETI
+   - Yeni anahtar: kaza-namazi-takip-gecmis-v1
+   - Gunluk kayit: kaza (6 vakit) + bulk (6 vakit) + kalan (6 vakit)
+   - Her sayaç degisiminde bugunun kaydi ANLIK guncellenir
+   - Mevcut kullanicilarin verisi bozulmaz; geçmiş boş başlar
+   - Alt tab bar: Takip | Özet | Ayarlar (3 sekme, skeleton)
+
+ Faz 1 - OZET EKRANI + AYARLAR
+   - Elle SVG grafik bileseni (BarChart.jsx): TEK RENK sutun grafigi
+   - Periyod secici: Gunlük (7 gün) | Haftalik (12 hafta) | Aylik (12 ay)
+   - Sutunda TEK RENK toplam (zumrut) — kaza/bulk ayrimi yok (K-15)
+   - Vakit dagilimi: yatay cubuklar (isim + sayi + yuzde)
+   - Karsilastirma: onceki doneme gore yon + yuzde
+   - Tahmini bitis: ortalama hiz (ana) + en iyi hiz (alt metin)
+   - Ayarlar sekmesi: il listesi (81 il) + GPS butonu + veri sifirlama
+   - Ayni localStorage anahtarlari; sifirlama akislari (ResetButton) guncellenir
+
+ Faz 2 — VAKIT HESAPLAMA + VAKITLER EKRANI
+   - adhan 4.4.6 kurulur
+   - CalculationMethod.Turkey() (Diyanet) + Madhab.Hanafi
+   - SunnahTimes -> Teheccüd (gecenin son üçte biri)
+   - Sehir listesi (81 il) + GPS + manuel koordinat
+   - Vitir hesabi + sahih nafile: Teheccud, Kusluk, Evvabin
+     (Istikamet/Evsab kaldirildi - sahih nafile degil)
+   - "Sifirdan 3 dk" vakit sapmasi ayari
+   - Gece yarisi gecisinde yeniden hesap
+
+ Faz 3 — BILDIRIMLER (UYGULAMA ACIKKEN) + .ics
+   - Bildirim izni onboarding ekrani
+   - Ayarlar'da 5 vakit secimi + nafile secimi
+   - Foreground bildirim + zamanlayici
+   - Bildirimden tek dokunusla sayac artirma (onayli)
+   - .ics dosya uretimi (VALARM) -> "Takvime ekle"
+
+ Faz 4 — ARKA PLAN BILDIRIMI (WEB PUSH)
+   - ANCAK AYRI ONAY ILE. Once ayri bir branch/vercel preview'da denenir.
+   - VAPID anahtarlari, sunucu function, abonelik deposu, gunluk cron
+   - Canliya dokunulmadan once kullanicidan acik onay alinir
+
+ Faz 5 — POLISLISH
+   - Hedef/seri/rozet, yedekleme, paylasim, hicri geri sayim
+
+--------------------------------------------------------------------------------
+6. RISKLER
+--------------------------------------------------------------------------------
+ - adhan ~50 KB (PWA offline icin kabul edilebilir)
+ - iOS'ta Web Push yalnizca "ana ekrana eklenmis PWA" iken calisir
+ - Adhan/Diyanet saatleri +/-2 dk fark gosterebilir -> manuel sapma ayari
+ - Vercel serverless eklemek deploy davranisini degistirir -> ayri onay
+ - Eski tarayicilarda Notification/Push destegi yok -> sessizce gracefully degrade
+ - localStorage kota (5-10 MB) -> SINIRSIZ gunluk kayit yeterli
+   (gunluk kayit ~100 byte; 10 yil ~365 KB). Kota riski yok.
+
+--------------------------------------------------------------------------------
+7. KARARLARIN ÖZETİ (19.10.2026 — hepsi onaylandı, bkz. bölüm 0.1)
+--------------------------------------------------------------------------------
+ D1. Bildirim mimarisi  ->  KATMAN 1+2+3 (sunucusuz) + Faz 4'te WEB PUSH
+     (Yol A standart push + Yol B declarative push). Onaylandi.
+ D2. Grafik            ->  ELLE SVG (0 KB ek bagimlilik, offline, tema uyumu).
+     Onaylandi.
+ D3. Ekran yapısı      ->  ALT TAB BAR, 3 sekme: Takip | Özet | Ayarlar.
+     (Vakitler ayrı sekme değil; vakit hesabı Ayarlar içinde.)
+ D4. Vakit konumu     ->  Il listesi (81 il) + GPS + manuel — hepsi.
+ D5. Veri modeli      ->  Günlük kaza miktarı + günlük kalan borç +
+     vakit bazlı kırılım. Saat detayı yok. Sınırsız saklama.
+ D6. Toplu ekleme     ->  Günlük kayda yazılır + özel işaret (bulk).
+     Veri katmanında ayrı kova tutulur; grafikte ayrı renk YOKTUR (K-15: tek renk toplam sütun).
+ D7. Vakit sapmasi    ->  Evet, her vakit icin +/- dk ayari (Faz 2).
+ D8. Özet ekranı      ->  Günlük/Haftalık/Aylık seçici + sütun grafik +
+     vakit dağılımı (yatay çubuk) + karşılaştırma (yön+yüzde) +
+     tahmini bitiş (ortalama hız + en iyi hız). Streak/rozet yok.
+ D9. Bildirimde sayaç  ->  Varsayilan KAPALI; kullanıcının acikca onaylamasi
+     otomatik artirma     gerekir. (Faz 3)
+ D10. Ayarlar kapsamı  ->  Faz 1: veri sıfırlama + il listesi + GPS.
+                       Faz 2: vakit hesabı. Faz 3: bildirim izni.
+
+--------------------------------------------------------------------------------
+7B. İLERLEME GÜNLÜĞÜ (her adımda güncellenir)
+--------------------------------------------------------------------------------
+ * 19.10.2026 Faz 0 TAMAM: geçmiş veri modeli + tab bar iskeleti (18/18 test).
+ * 20.10.2026 K-15: grafik tek renk kararı (kaza/bulk görsel ayrımı kalktı).
+ * 20.10.2026 Faz 1 TAMAM: Ozet ekrani (tek renk grafik 7/4/6 sutun +
+   dagilim + karsilastirma + tahmini bitis) + Ayarlar (konum + sifirlama).
+   Dogrulama: test-faz1.mjs 16/16 PASS, Faz 0 regresyon 18/18 PASS,
+   test-history.mjs birim testleri PASS. Siradaki: Faz 2 (vakit hesabi).
+ * 20.10.2026 Faz 2 TAMAM: vakit hesabi (adhan 4.4.6 + Turkey/Diyanet Hanefi).
+   5 vakit + vitir (Yatsi +30 dk) + sahih nafile (Teheccud/son ucte bir,
+   Kusluk/Duha +50 dk, Evvabin/Aksam +20 dk; Istikamet-Evsab kaldirildi)
+   kaza-namazi-takip-vakit-sapma-v1) + manuel koordinat + gece yarisi yeniden
+   hesap. Dogrulama: test-faz2.mjs 18/18 PASS (sapma 05:49->05:54 dahil),
+   Faz 1 16/16, Faz 0 18/18, birim testler PASS. Siradaki: Faz 3 (bildirim).
+ * 20.10.2026 Faz 2 KORREKSIYON: nafile listesinden Istikamet ve Evsab
+   KALDIRILDI (sahih nafile namazi degiller). Yerine Ehl-i Sunnet'e gore
+   sahih nafile eklendi: Teheccud (son ucte bir), Kusluk/Duha (gunes dogusu
+   +50 dk), Evvabin (Aksam +20 dk). Ayrica testlerde servis worker'in bayat
+   bundle servis ettigi tespit edildi; test-faz1/faz2'ye SW + cache temizligi
+   ve cache-disable eklendi. Siradaki: Faz 3 (bildirim).
+ * 19.11.2026 Gereksinim belgesi: docs/GEREKSINIMLER.md (SRS) olusturuldu.
+ * 19.11.2026 K-16 RENK SISTEMI UYGULANDI: primary (yesil) + accent (mor)
+   token'lari; jade/imperial/velvet kaldirildi; 16 dosya guncellendi.
+   UX duzeltmesi: −1/−5 (kilindi) artik belirgin yesil, +1/+5 sakin mor
+   (onceden ana eylem gri, borc ekleme yesildi). Dogrulama: build OK,
+   test-faz1 16/16, test-faz2 18/18, test-history PASS.
+   NOT: Testler eski SW tutan %TEMP%\kaza-chrome-faz* profiliyle kararsiz
+   calisiyor; profil silinince geciyor (bkz. GEREKSINIMLER TD-04).
+ * 19.11.2026 Faz 2.5 TAMAM:
+   - src/constants/storage.js: tum depo anahtarlari tek yerde + sema surumu.
+   - src/utils/migrations.js: acilista calisir; adimlar kopya uzerinde,
+     hata olursa depoya hic yazilmaz; yazma yarida kalirsa geri doner.
+     Canlidaki surumsuz v1 verisi dokunulmadan 'sema=1' olarak isaretlenir.
+   - src/utils/backup.js + BackupPanel + RestoreBackupButton: JSON yedek
+     indir / geri yukle (dogrulama + ozet + onay), kurulum ekraninda da.
+   - Sifirlama Takip ekranindan kaldirildi, Ayarlar'da neyin silinecegi listelenir.
+   - npm test (Vitest 2.1.9): 40 birim test (history, migrations, backup).
+   - npm run test:e2e: faz1 16/16, faz2 18/18, YENI faz25 17/17.
+   - e2e testleri artik her calistirmada temiz Chrome profili kullanir ve
+     Google Fonts'u engeller (agdan bagimsiz, kararli).
+   BULGU: Google Fonts stil dosyasi render'i bloke ediyor; yavas agda
+   uygulama saniyelerce bos ekran gosteriyor (TD-10). Oneri: fontlari
+   uygulamaya gomup (self-host) PWA onbellegine almak.
+   Siradaki: Faz 3 (bildirimler).
+ * 19.11.2026 TD-10 COZULDU (K-21): Google Fonts kaldirildi, fontlar gomulu.
+   Olcum: sayfa ~0,6 sn'de aciliyor, harici font istegi 0; precache 519 KB.
+ * 19.11.2026 Faz 3 TAMAM (K-22..K-24):
+   - src/utils/notifications.js: TEK bildirim servisi. Once SW
+     (reg.showNotification) — Android Chrome `new Notification` desteklemez;
+     SW yoksa sayfa ici API. BirthdayBanner bu servise tasindi (alert kalkti).
+   - public/sw-notifications.js: bildirime dokunma -> pencereyi one getir +
+     postMessage; pencere yoksa /?vakit=<id>. workbox.importScripts ile eklendi.
+   - src/utils/reminders.js + hooks/useReminders.js: 20 sn'de bir ve sekme
+     gorunur olunca "son kontrolden beri zamani gelen" olaylar; uzun uykudan
+     donuste yalniz son 10 dk; ayni tag -> coklu sekmede tekrar yok.
+   - src/utils/ics.js: RFC 5545 (CRLF, UTF-8 guvenli satir katlama, kacis).
+   - Ayarlar > Bildirimler: izin akisi (yalniz dokunusla), vakit/nafile secimi,
+     dk once, siradaki hatirlatma, deneme bildirimi, takvime ekle, izin
+     reddi / destek yok / konum yok durumlari.
+   - Konum, sapma ve hatirlatma durumu App'e tasindi (zamanlayici da kullaniyor).
+   Dogrulama: npm test 69/69; e2e faz1 16/16, faz2 18/18, faz25 17/17,
+   YENI faz3 26/26 (sayfa saati ogleden 25 sn once alinip gercek
+   bildirimin tam 1 kez geldigi dogrulandi).
+   KISIT (durust not): hatirlatmalar uygulama acikken / arka planda canliyken
+   gelir. Telefon kilitliyken kesin yol .ics; tam cozum Faz 4 Web Push
+   (sunucu gerektirir, AYRI ONAY).
+
+--------------------------------------------------------------------------------
+8. OZET / VARSAYILAN
+--------------------------------------------------------------------------------
+Plan onaylandiginda varsayilan olarak sunulacak olan:
+   - Alt tab bar: Takip | Özet | Ayarlar
+   - Özet ekrani ana hedef: gunluk/haftalik/aylik secici + sutun grafik
+     (tek renk: donem toplami, zumrut sutun) +
+     vakit dagilimi yatay cubuklar + karsilastirma (yon + yuzde) +
+     tahmini bitis (ortalama hiz ana, en iyi hiz alt metin)
+   - Vakitler (Faz 2, Ayarlar icinde): adhan + Diyanet (Turkey method),
+     5 vakit + vitir + nafile (teheccüd, kuşluk, evvâbin), il/GPS/manuel
+   - Bildirim: 5 vakit + nafile secimi, foreground + .ics, sonra Web Push
+   - Veri: localStorage 'kaza-namazi-takip-gecmis-v1' — gunluk kaza +
+     gunluk kalan borc + vakit kirilimi, sinirsiz saklama
+   - Hicbir commit/deploy yok; tum is 'feat/summary-phase' branch'inde
