@@ -1,16 +1,18 @@
-import { useState, useEffect } from 'react'
-import { PartyPopper, Moon, Calendar, Bell, Check, HeartHandshake, Sparkles, HandHeart } from 'lucide-react'
+import { useState } from 'react'
+import { PartyPopper, Moon, HeartHandshake, Sparkles, HandHeart, Bell, Check } from 'lucide-react'
 import { checkBirthdays } from '../utils/hijriDate'
-import {
-  getNotificationPermission,
-  requestNotificationPermission,
-  showAppNotification
-} from '../utils/notifications'
+import { getNotificationPermission } from '../utils/notifications'
 
-export default function BirthdayBanner({ profile }) {
+export default function BirthdayBanner({ profile, greetingEnabled = false, onEnableGreeting }) {
   const birthDate = profile?.birthDate
-  const [notificationState, setNotificationState] = useState('default') // 'default' | 'granted' | 'denied' | 'unsupported'
   const [dismissed, setDismissed] = useState(false)
+  const [permission, setPermission] = useState(getNotificationPermission)
+  const greetingOn = greetingEnabled && permission === 'granted'
+
+  const enableGreeting = async () => {
+    const p = await onEnableGreeting?.()
+    if (p) setPermission(p)
+  }
 
   const birthdayInfo = checkBirthdays(birthDate)
   const {
@@ -18,36 +20,10 @@ export default function BirthdayBanner({ profile }) {
     isHijriBirthday,
     gregorianAge,
     hijriAge,
-    hijriBirthDate,
-    todayHijriDate
+    hijriBirthDate
   } = birthdayInfo
 
-  useEffect(() => {
-    setNotificationState(getNotificationPermission())
-  }, [])
-
   if (!birthDate || dismissed) return null
-
-  // Bildirim izni isteme ve tebrik/deneme bildirimi — ortak servis üzerinden (TD-07)
-  const handleRequestNotification = async () => {
-    const permission = await requestNotificationPermission()
-    setNotificationState(permission)
-    if (permission !== 'granted') return
-
-    const title = isHijriBirthday
-      ? 'Hicrî Doğum Gününüz Mübarek Olsun!'
-      : isGregorianBirthday
-        ? 'Miladî Doğum Gününüz Kutlu Olsun!'
-        : 'Kaza Namazı Takip Bildirimleri Açıldı'
-
-    const body = isHijriBirthday
-      ? `Bugün ${hijriBirthDate?.formatted} (${hijriAge}. Hicrî yaşınız). Allah ömrünüzü bereketli eylesin.`
-      : isGregorianBirthday
-        ? `Miladî ${gregorianAge}. yaşınız kutlu olsun. Rabbim hayırlı uzun ömürler versin.`
-        : 'Hicrî ve Miladî doğum günlerinizde size özel tebrik bildirimi gönderilecektir.'
-
-    await showAppNotification(title, { body, tag: 'dogum-gunu' })
-  }
 
   // Bugün Doğum Günü mü? (Miladî veya Hicrî)
   const isCelebrationDay = isGregorianBirthday || isHijriBirthday
@@ -114,32 +90,12 @@ export default function BirthdayBanner({ profile }) {
                 <HandHeart size={14} className="inline ml-1 text-accent-400" />
               </div>
             </div>
-
-            {/* Bildirim Al Butonu */}
-            <div className="flex items-center justify-between gap-2 border-t border-white/[0.08] pt-3">
-              <span className="text-[11px] text-zinc-400">Her doğum gününde bildirim al</span>
-              <button
-                type="button"
-                onClick={handleRequestNotification}
-                className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-bold btn-brand-gradient active:scale-95 transition-all"
-              >
-                {notificationState === 'granted' ? (
-                  <>
-                    <Check size={13} /> Bildirimler Açık
-                  </>
-                ) : (
-                  <>
-                    <Bell size={13} /> Bildirimi Aç
-                  </>
-                )}
-              </button>
-            </div>
           </div>
         </div>
       ) : (
         /* ═════════ HİCRÎ & MİLADÎ YAŞ KARTI (NORMAL GÜN) ═════════ */
         <div className="rounded-2xl islamic-card p-4 border border-accent-500/15 shadow-md">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-500/15 border border-accent-500/30 text-accent-300">
                 <Moon size={16} />
@@ -161,22 +117,26 @@ export default function BirthdayBanner({ profile }) {
             </div>
           </div>
 
-          {/* Güncel Hicrî Tarih & Bildirim Açma */}
-          <div className="flex items-center justify-between border-t border-white/[0.06] pt-2.5 mt-2 text-[11px]">
-            <span className="text-zinc-400 flex items-center gap-1">
-              <Calendar size={12} className="text-accent-400" /> Bugüne karşılık gelen: <b className="text-zinc-200">{todayHijriDate?.formatted}</b>
+          {/* Doğum günü tebriği (K-29) — gerçekten zamanlanır: useBirthdayGreeting */}
+          <div className="flex items-center justify-between gap-2 border-t border-white/[0.06] pt-2.5 mt-3 text-[11px]">
+            <span className="text-zinc-400">
+              {permission === 'denied' || permission === 'unsupported'
+                ? 'Bildirim yok — Ayarlar’dan takvime ekleyebilirsin'
+                : 'Miladî & Hicrî doğum gününde tebrik'}
             </span>
-            <button
-              type="button"
-              onClick={handleRequestNotification}
-              className="text-accent-400 hover:text-accent-300 font-semibold flex items-center gap-1 transition-colors"
-            >
-              {notificationState === 'granted' ? (
-                <span className="text-primary-400 flex items-center gap-1"><Check size={11} /> Bildirim Aktif</span>
-              ) : (
-                <span className="flex items-center gap-1"><Bell size={11} /> Doğum Günü Bildirimi Aç</span>
-              )}
-            </button>
+            {greetingOn ? (
+              <span className="flex items-center gap-1 font-semibold text-primary-300" data-testid="birthday-greeting-on">
+                <Check size={12} /> Tebrik açık
+              </span>
+            ) : permission === 'denied' || permission === 'unsupported' ? null : (
+              <button
+                type="button"
+                onClick={enableGreeting}
+                className="flex items-center gap-1 h-8 px-2.5 rounded-lg font-semibold text-accent-200 bg-accent-500/10 border border-accent-400/25 hover:bg-accent-500/20 transition-colors"
+              >
+                <Bell size={12} /> Tebriği aç
+              </button>
+            )}
           </div>
         </div>
       )}

@@ -48,7 +48,7 @@ export default function BarChart({ data }) {
           return (
             <g key={f}>
               <line x1={PAD_L} y1={y} x2={W - PAD_R} y2={y} stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
-              <text x={W - PAD_R} y={y - 3} textAnchor="end" fontSize="8" fill="#71717a">
+              <text x={W - PAD_R} y={y - 3} textAnchor="end" fontSize="8" fill="#8e8e98">
                 {val}
               </text>
             </g>
@@ -56,7 +56,7 @@ export default function BarChart({ data }) {
         })}
 
         {allZero && (
-          <text x={W / 2} y={base - plotH / 2} textAnchor="middle" fontSize="11" fill="#52525b">
+          <text x={W / 2} y={base - plotH / 2} textAnchor="middle" fontSize="11" fill="#8e8e98">
             Bu dönemde kayıt yok
           </text>
         )}
@@ -97,7 +97,7 @@ export default function BarChart({ data }) {
                   </text>
                 </>
               )}
-              <text x={x + barW / 2} y={H - 10} textAnchor="middle" fontSize="8.5" fill={isLast ? '#a7f3d0' : '#71717a'}>
+              <text x={x + barW / 2} y={H - 10} textAnchor="middle" fontSize="8.5" fill={isLast ? '#a7f3d0' : '#8e8e98'}>
                 {b.label}
               </text>
             </g>

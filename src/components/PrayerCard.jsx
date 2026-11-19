@@ -31,12 +31,20 @@ function QuickButton({ onClick, disabled, children, label, variant }) {
  * Tek vakit kaza kartı — İslami saray çinileri ve kadife renk teması.
  * locked=true olduğunda butonlar devre dışı kalır.
  */
-function PrayerCard({ prayer, count, onChange, index, locked = false, onLockHint, highlighted = false }) {
+function PrayerCard({ prayer, count, onChange, index, locked = false, onLockHint, highlighted = false, todayDone = 0 }) {
   const Icon = prayer.icon
   const atZero = count <= 0
 
   const handleChange = (delta) => {
     if (locked) return
+    // Kaza kılındı (−) → kısa dokunsal geri bildirim (destekleyen cihazlarda)
+    if (delta < 0) {
+      try {
+        navigator.vibrate?.(12)
+      } catch {
+        /* desteklenmiyor */
+      }
+    }
     const next = Math.max(0, count + delta)
     onChange(prayer.id, next, delta)
   }
@@ -67,13 +75,15 @@ function PrayerCard({ prayer, count, onChange, index, locked = false, onLockHint
                   </span>
                 )}
               </div>
-              <p className="text-[11px] text-zinc-400 mt-0.5">kaza borcu</p>
+              <p className={`text-[11px] mt-0.5 ${todayDone > 0 ? 'text-primary-200 font-semibold' : 'text-zinc-400'}`}>
+                {todayDone > 0 ? `bugün ${todayDone.toLocaleString('tr-TR')} kılındı` : 'kalan kaza borcu'}
+              </p>
             </div>
           </div>
 
           {/* Kalan borç — vaktin rengiyle (gün boyu yeşilden mora) */}
           <div className="text-right">
-            <span className={`text-3xl font-black tabular-nums leading-none tracking-tight ${count > 0 ? prayer.numberColor : 'text-zinc-600'}`}>
+            <span className={`text-3xl font-black tabular-nums leading-none tracking-tight ${count > 0 ? prayer.numberColor : 'text-zinc-500'}`}>
               {count.toLocaleString('tr-TR')}
             </span>
           </div>

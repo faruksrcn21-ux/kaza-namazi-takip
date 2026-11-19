@@ -35,7 +35,7 @@ function StepperField({ label, value, onChange, min = 0, max = 999, hint }) {
             const v = e.target.value === '' ? min : Number(e.target.value)
             onChange(Math.max(min, Math.min(max, v)))
           }}
-          className="w-full rounded-xl bg-surface-900 border border-white/[0.08] px-2 py-2 text-center text-lg font-bold tabular-nums text-primary-300 placeholder:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-accent-500/40 transition-all"
+          className="w-full rounded-xl bg-surface-900 border border-white/[0.08] px-2 py-2 text-center text-lg font-bold tabular-nums text-primary-300 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-accent-500/40 transition-all"
         />
         <button
           type="button"
@@ -251,7 +251,7 @@ export default function SetupWizard({ onComplete }) {
                         value={manualCounts[prayer.id] || ''}
                         onFocus={(e) => e.target.select()}
                         onChange={(e) => updateManual(prayer.id, e.target.value === '' ? 0 : Number(e.target.value))}
-                        className="w-20 rounded-lg bg-surface-900 border border-white/[0.08] px-2 py-1.5 text-center text-base font-bold tabular-nums text-primary-300 placeholder:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-accent-500/40 transition-all"
+                        className="w-20 rounded-lg bg-surface-900 border border-white/[0.08] px-2 py-1.5 text-center text-base font-bold tabular-nums text-primary-300 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-accent-500/40 transition-all"
                       />
                       <button
                         type="button"
@@ -505,7 +505,7 @@ export default function SetupWizard({ onComplete }) {
                       </div>
                       <span className="font-semibold text-zinc-200 text-sm">{prayer.name}</span>
                     </div>
-                    <span className={`text-xl font-extrabold tabular-nums ${count > 0 ? (prayer.isVitir ? 'text-brand-gradient' : 'text-primary-300') : 'text-zinc-600'}`}>
+                    <span className={`text-xl font-extrabold tabular-nums ${count > 0 ? (prayer.isVitir ? 'text-brand-gradient' : 'text-primary-300') : 'text-zinc-500'}`}>
                       {count.toLocaleString('tr-TR')}
                     </span>
                   </div>

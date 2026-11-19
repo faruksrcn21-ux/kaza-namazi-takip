@@ -4,6 +4,7 @@ import BackupPanel from '../components/BackupPanel'
 import LocationPicker from '../components/LocationPicker'
 import PrayerTimesCard from '../components/PrayerTimesCard'
 import NotificationSettings from '../components/NotificationSettings'
+import BirthdayGreetingSettings from '../components/BirthdayGreetingSettings'
 import { usePrayerTimes } from '../hooks/usePrayerTimes'
 import { normalizeOffsets } from '../utils/prayerTimes'
 
@@ -93,6 +94,11 @@ export default function SettingsScreen({
             onChange={onRemindersChange}
             location={location}
             offsets={offsets}
+          />
+          <BirthdayGreetingSettings
+            birthDate={profile?.birthDate}
+            settings={reminders}
+            onChange={onRemindersChange}
           />
         </section>
 

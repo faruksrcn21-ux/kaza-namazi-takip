@@ -1,11 +1,23 @@
 import { useState, useEffect } from 'react'
 import { Smartphone, Download, X, Share2, PlusSquare } from 'lucide-react'
+import { STORAGE_KEY_INSTALL_DISMISSED } from '../constants/storage'
+
+const SNOOZE_MS = 30 * 24 * 60 * 60 * 1000
+const wasDismissedRecently = () => {
+  try {
+    const at = Number(window.localStorage.getItem(STORAGE_KEY_INSTALL_DISMISSED))
+    return Number.isFinite(at) && at > 0 && Date.now() - at < SNOOZE_MS
+  } catch {
+    return false
+  }
+}
 
 export default function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState(null)
   const [showModal, setShowModal] = useState(false)
   const [isIOS, setIsIOS] = useState(false)
   const [isInstalled, setIsInstalled] = useState(false)
+  const [dismissed, setDismissed] = useState(wasDismissedRecently)
 
   useEffect(() => {
     // Zaten standalone (uygulama olarak) açılmışsa gizle
@@ -29,7 +41,16 @@ export default function InstallPrompt() {
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall)
   }, [])
 
-  if (isInstalled) return null
+  if (isInstalled || dismissed) return null
+
+  const dismiss = () => {
+    setDismissed(true)
+    try {
+      window.localStorage.setItem(STORAGE_KEY_INSTALL_DISMISSED, String(Date.now()))
+    } catch {
+      /* yalnız bu oturumda gizlenir */
+    }
+  }
 
   const handleInstallClick = async () => {
     if (deferredPrompt) {
@@ -55,7 +76,7 @@ export default function InstallPrompt() {
           </div>
           <div>
             <p className="text-xs font-bold text-zinc-100">Telefona Uygulama Olarak Yükle</p>
-            <p className="text-[10px] text-primary-200/70">Ana ekrana ekle, internetsiz kullan</p>
+            <p className="text-[11px] text-primary-100/90">Ana ekrana ekle, internetsiz kullan</p>
           </div>
         </div>
 
@@ -66,6 +87,14 @@ export default function InstallPrompt() {
         >
           <Download size={14} />
           Yükle
+        </button>
+        <button
+          type="button"
+          onClick={dismiss}
+          aria-label="Yükleme önerisini kapat"
+          className="-mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-white/[0.06] transition-colors"
+        >
+          <X size={16} />
         </button>
       </div>
 

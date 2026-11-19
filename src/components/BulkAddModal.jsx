@@ -34,7 +34,7 @@ function NumberField({ label, value, onChange, min = 0, max = 999, hint }) {
             const v = e.target.value === '' ? min : Number(e.target.value)
             onChange(Math.max(min, Math.min(max, v)))
           }}
-          className="w-full rounded-xl bg-surface-900 border border-white/[0.08] px-2 py-2 text-center text-lg font-bold tabular-nums text-primary-300 placeholder:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-accent-500/40 transition-all"
+          className="w-full rounded-xl bg-surface-900 border border-white/[0.08] px-2 py-2 text-center text-lg font-bold tabular-nums text-primary-300 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-accent-500/40 transition-all"
         />
         <button
           type="button"
@@ -73,7 +73,7 @@ function CompactDurationField({ label, value, onChange, max = 999 }) {
           placeholder="0"
           onFocus={(e) => e.target.select()}
           onChange={(e) => onChange(e.target.value === '' ? 0 : Math.max(0, Number(e.target.value)))}
-          className="w-full text-center text-lg font-extrabold tabular-nums text-brand-gradient bg-transparent focus:outline-none placeholder:text-zinc-700"
+          className="w-full text-center text-lg font-extrabold tabular-nums text-brand-gradient bg-transparent focus:outline-none placeholder:text-zinc-500"
         />
         <button
           type="button"

@@ -1,6 +1,6 @@
 ================================================================================
  KAZA NAMAZI TAKİP — GELİŞTİRME PLANLAMASI
- Tarih: 19.10.2026 | Güncelleme: 19.11.2026 | Durum: Faz 0-3 + 2.5 TAMAM, K-16 renk sistemi uygulandı · Sıradaki: Faz 4 (ayrı onayla) / Faz 5
+ Tarih: 19.10.2026 | Güncelleme: 19.11.2026 | Durum: Faz 0-3 + 2.5 + Faz 5 (1. tur) TAMAM · Sıradaki: Faz 5 (2. tur) / Faz 4 (ayrı onayla)
  Gereksinimler (SRS): docs/GEREKSINIMLER.md
 ================================================================================
 
@@ -82,6 +82,29 @@
  K-23  .ics: 7 veya 30 gunluk, secili vakitler + "dk once" alarmi (VALARM).
                        Bildirim desteklenmese/izin reddedilse de kullanilabilir.
  K-24  Hatirlatma ayarlari yedege dahil (reminders alani); eski yedekler gecerli.
+ K-25  Faz 5 kapsami (19.11.2026): "Bugun" karti (hicri tarih, bugun kilinan,
+                       en cok borcu kalan vakit onerisi, yaklasan mubarek gun/gece),
+                       kartlarda "bugun N kilindi", −1'de hafif titresim,
+                       kapatilabilir yukleme bandi (30 gun), erisilebilirlik.
+                       Sonraya: acik tema, paylasim, gunluk hedef.
+ K-26  Mubarek gunler Umm'ul-Kura takviminden hesaplanir; Diyanet'ten 1 gun
+                       sapabilecegi icin arayuzde "±1 gun" notu gosterilir.
+                       Kandil = hicri gunden onceki aksam.
+ K-27  Dogum gunu kartindaki "dogum gunlerinde bildirim gonderilecek" sozu
+                       KALDIRILDI (kodda boyle bir zamanlama hic yoktu). Bugunun
+                       hicri karsiligi "Bugun" kartina tasindi.
+ K-28  Ikincil metin rengi (zinc-500) #71717a -> #8e8e98 (kontrast 3,1-4,1 ->
+                       >= 4,6). Erisilebilirlik denetimi (axe, WCAG 2.2 AA) e2e'ye eklendi.
+ K-29  Dogum gunu tebrigi (19.11.2026, kullanici karari: "tutulmayan sozu tutalim"):
+                       K-27 geri alindi; soz bu kez GERCEKTEN tutuluyor.
+                       - Miladi ve/veya Hicri dogum gununde 09:00'dan sonra BIR KEZ
+                         bildirim (yil basina; miladi-<yil>/hicri-<yil> kaydi).
+                       - Uygulama kapaliyken: 10 yillik Miladi + Hicri dogum gunleri
+                         tum gun takvim etkinligi (.ics, 09:00 alarm).
+                       - Ac/kapat: dogum gunu kartinda + Ayarlar > Bildirimler.
+                       - Duzeltmeler: tarih UTC degil yerel okunur; 29 Subat
+                         dogumlular artik olmayan yilda 28 Subat'ta; Hicri 30
+                         dogumlular ay 29 cekince 29'unda kutlanir.
 
 --------------------------------------------------------------------------------
 1. MEVCUT MİMARİNİN GERÇEK HÂLİ
@@ -469,6 +492,23 @@ F) ASAMA PLANI (her asama bagimsiz test edilebilir)
    KISIT (durust not): hatirlatmalar uygulama acikken / arka planda canliyken
    gelir. Telefon kilitliyken kesin yol .ics; tam cozum Faz 4 Web Push
    (sunucu gerektirir, AYRI ONAY).
+ * 19.11.2026 COMMIT (acik onayla, push YOK): c92cb90 feat, 5118b38 test,
+   7a2a259 docs — feat/summary-phase dalinda.
+ * 19.11.2026 Faz 5 (1. tur) TAMAM (K-25..K-28):
+   - TodayCard + utils/specialDays.js (11 mubarek gun/gece, Turkce ek uyumu).
+   - PrayerCard: "bugun N kilindi", titresim. InstallPrompt: kapat (30 gun).
+   - BirthdayBanner: sahte bildirim sozu kaldirildi.
+   - Erisilebilirlik: tools/test-a11y.mjs (axe-core). Cam/gradyan yuzeyler
+     olculemedigi icin denetimde en kotu durum duz renge cevrilerek olculur.
+     Bulunan: 26 kontrast ihlali (zinc-500, placeholder, sifir sayac,
+     grafik eksen yazilari) -> hepsi duzeltildi.
+   Dogrulama: npm test 77/77; e2e faz1 16/16, faz2 18/18, faz25 17/17,
+   faz3 26/26, YENI faz5 15/15, a11y 0 ciddi/kritik ihlal.
+ * 19.11.2026 K-29 dogum gunu tebrigi: utils/birthdayGreeting.js,
+   hooks/useBirthdayGreeting.js, BirthdayGreetingSettings.jsx, ics tum-gun
+   etkinlik destegi. Dogrulama: npm test 89/89; e2e faz5 23/23 (sayfa saati
+   dogum gunu 10:00'a alinip tebrigin tek kez geldigi ve yeniden acilista
+   tekrar gelmedigi dogrulandi); faz1/2/25/3 ve a11y regresyon gecti.
 
 --------------------------------------------------------------------------------
 8. OZET / VARSAYILAN

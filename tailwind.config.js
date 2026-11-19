@@ -43,6 +43,11 @@ export default {
           900: '#4c1d95',
           950: '#2e1065'
         },
+        // İkincil metin (NFR-06): varsayılan zinc-500 (#71717a) koyu kartlarda 3,1–4,1
+        // kontrast veriyordu. #8e8e98 en açık yüzeyde (surface-750) bile ≥ 4,6:1.
+        zinc: {
+          500: '#8e8e98'
+        },
         // Koyu yüzeyler — hafif mor tonlu; yeşili öne çıkarır, moru bütünleştirir
         surface: {
           950: '#08070d',

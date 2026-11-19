@@ -131,7 +131,7 @@ export default function LocationPicker({ value, onChange }) {
                   onChange={(e) => setManualLat(e.target.value)}
                   placeholder="41.0082"
                   aria-label="Enlem"
-                  className="w-full rounded-lg bg-white/[0.05] border border-white/[0.08] px-2.5 py-1.5 text-xs text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-primary-500/50"
+                  className="w-full rounded-lg bg-white/[0.05] border border-white/[0.08] px-2.5 py-1.5 text-xs text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-primary-500/50"
                 />
               </label>
               <label className="block">
@@ -143,7 +143,7 @@ export default function LocationPicker({ value, onChange }) {
                   onChange={(e) => setManualLon(e.target.value)}
                   placeholder="28.9784"
                   aria-label="Boylam"
-                  className="w-full rounded-lg bg-white/[0.05] border border-white/[0.08] px-2.5 py-1.5 text-xs text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-primary-500/50"
+                  className="w-full rounded-lg bg-white/[0.05] border border-white/[0.08] px-2.5 py-1.5 text-xs text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-primary-500/50"
                 />
               </label>
             </div>

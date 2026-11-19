@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { BellRing, BellOff, CalendarPlus, Info, Send, ShieldAlert } from 'lucide-react'
 import {
+  ensureNotificationPermission,
   getNotificationPermission,
-  requestNotificationPermission,
   showAppNotification
 } from '../utils/notifications'
 import { buildReminderEvents, formatClock, LEAD_OPTIONS, REMINDER_TARGETS } from '../utils/reminders'
@@ -24,7 +24,7 @@ const Chip = ({ active, onClick, children, sub }) => (
     }`}
   >
     {children}
-    {sub && <span className="block text-[10px] font-medium opacity-70 mt-0.5">{sub}</span>}
+    {sub && <span className="block text-[10px] font-medium opacity-80 mt-0.5">{sub}</span>}
   </button>
 )
 
@@ -89,11 +89,8 @@ export default function NotificationSettings({ settings, onChange, location, off
       update({ enabled: false })
       return
     }
-    let p = getNotificationPermission()
-    if (p === 'default') {
-      p = await requestNotificationPermission() // kullanıcı dokunuşu içinde (FR-BLD-01)
-      setPermission(p)
-    }
+    const p = await ensureNotificationPermission() // kullanıcı dokunuşu içinde (FR-BLD-01)
+    setPermission(p)
     if (p === 'granted') update({ enabled: true })
   }
 

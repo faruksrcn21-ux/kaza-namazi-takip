@@ -59,6 +59,27 @@ export function buildIcs(events, opts = {}) {
     `X-WR-CALNAME:${escapeText(calendarName)}`
   ]
   for (const e of events) {
+    if (e.allDay) {
+      // Tüm gün etkinlik (doğum günü): yerel tarih, alarm o gün saat alarmHour'da
+      const next = new Date(e.date.getFullYear(), e.date.getMonth(), e.date.getDate() + 1, 12)
+      lines.push(
+        'BEGIN:VEVENT',
+        `UID:${e.key.replace(/[^A-Za-z0-9@-]/g, '')}@kaza-namazi-takip`,
+        `DTSTAMP:${icsDate(now)}`,
+        `DTSTART;VALUE=DATE:${icsDay(e.date)}`,
+        `DTEND;VALUE=DATE:${icsDay(next)}`,
+        `SUMMARY:${escapeText(e.summary)}`,
+        `DESCRIPTION:${escapeText(e.description || '')}`,
+        'TRANSP:TRANSPARENT',
+        'BEGIN:VALARM',
+        'ACTION:DISPLAY',
+        `TRIGGER:PT${e.alarmHour ?? 9}H`,
+        `DESCRIPTION:${escapeText(e.summary)}`,
+        'END:VALARM',
+        'END:VEVENT'
+      )
+      continue
+    }
     const end = new Date(e.prayerTime.getTime() + 15 * 60 * 1000)
     const summary = e.kind === 'nafile' ? `${e.name} vakti (nafile)` : `${e.name} vakti`
     const desc = opts.description
@@ -88,5 +109,7 @@ export function buildIcs(events, opts = {}) {
 }
 
 const pad = (n) => String(n).padStart(2, '0')
-export const icsFileName = (now = new Date()) =>
-  `kaza-namazi-vakitleri-${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}.ics`
+/** Yerel takvim günü: 20261119 */
+export const icsDay = (d) => `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`
+export const icsFileName = (now = new Date(), prefix = 'kaza-namazi-vakitleri') =>
+  `${prefix}-${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}.ics`

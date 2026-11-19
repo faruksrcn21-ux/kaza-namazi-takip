@@ -77,7 +77,7 @@ export default function SummaryScreen({ history, totalRemaining }) {
                 }`}
               >
                 {PERIODS[p].label}
-                <span className="block text-[10px] font-medium opacity-70">
+                <span className="block text-[10px] font-medium opacity-80">
                   {PERIODS[p].bucketCount} {p === 'day' ? 'gün' : p === 'week' ? 'hafta' : 'ay'}
                 </span>
               </button>

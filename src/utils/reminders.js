@@ -31,7 +31,8 @@ export const DEFAULT_REMINDER_SETTINGS = {
     kusluk: false,
     evvabin: false
   },
-  leadMinutes: 0
+  leadMinutes: 0,
+  birthday: false // doğum günü tebriği (K-29) — vakit hatırlatmalarından bağımsız
 }
 
 /** Bozuk / eksik ayarı güvenli varsayılanlarla tamamlar. */
@@ -48,7 +49,8 @@ export function normalizeReminderSettings(raw) {
   return {
     enabled: raw.enabled === true,
     targets,
-    leadMinutes: LEAD_OPTIONS.includes(raw.leadMinutes) ? raw.leadMinutes : d.leadMinutes
+    leadMinutes: LEAD_OPTIONS.includes(raw.leadMinutes) ? raw.leadMinutes : d.leadMinutes,
+    birthday: raw.birthday === true
   }
 }
 

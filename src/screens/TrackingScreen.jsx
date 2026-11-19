@@ -5,6 +5,7 @@ import PrayerCard from '../components/PrayerCard'
 import ProgressHeader from '../components/ProgressHeader'
 import InstallPrompt from '../components/InstallPrompt'
 import BirthdayBanner from '../components/BirthdayBanner'
+import TodayCard from '../components/TodayCard'
 
 /**
  * "Takip" sekmesi — mevcut ana ekran.
@@ -22,8 +23,14 @@ export default function TrackingScreen({
   onLockHint,
   onOpenBulk,
   onCardChange,
-  highlightId
+  highlightId,
+  todayKaza,
+  onSuggest,
+  birthdayGreetingEnabled,
+  onEnableBirthdayGreeting
 }) {
+  const todayTotal = Object.values(todayKaza || {}).reduce((s, n) => s + (n || 0), 0)
+
   // Bildirimden gelindiyse ilgili vakit kartını ortala
   useEffect(() => {
     if (!highlightId) return undefined
@@ -54,11 +61,18 @@ export default function TrackingScreen({
         </div>
       </header>
 
+      {/* Bugün: hicrî tarih · kılınan · öneri · mübarek gün (Faz 5) */}
+      <TodayCard todayTotal={todayTotal} counts={counts} onSuggest={onSuggest} />
+
       {/* Telefona Yükle Banner'ı */}
       <InstallPrompt />
 
       {/* Hicrî & Miladî Doğum Günü Tebrik & Yaş Kartı */}
-      <BirthdayBanner profile={profile} />
+      <BirthdayBanner
+        profile={profile}
+        greetingEnabled={birthdayGreetingEnabled}
+        onEnableGreeting={onEnableBirthdayGreeting}
+      />
 
       {/* 🔒 Kilit Modu Toggle + Toplu Hesaplama Butonu */}
       <div className="flex gap-2.5 mb-6">
@@ -127,6 +141,7 @@ export default function TrackingScreen({
             locked={locked}
             onLockHint={onLockHint}
             highlighted={highlightId === prayer.id}
+            todayDone={todayKaza?.[prayer.id] || 0}
           />
         ))}
       </div>

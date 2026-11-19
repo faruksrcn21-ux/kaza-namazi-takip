@@ -10,13 +10,15 @@ import {
 import { useLocalStorage } from './hooks/useLocalStorage'
 import { useHistory } from './hooks/useHistory'
 import { useReminders } from './hooks/useReminders'
+import { useBirthdayGreeting } from './hooks/useBirthdayGreeting'
 import {
   STORAGE_KEY_LOCATION,
   STORAGE_KEY_PRAYER_OFFSETS,
   STORAGE_KEY_REMINDERS
 } from './constants/storage'
 import { DEFAULT_REMINDER_SETTINGS, normalizeReminderSettings } from './utils/reminders'
-import { NOTIFICATION_CLICK_MESSAGE } from './utils/notifications'
+import { NOTIFICATION_CLICK_MESSAGE, ensureNotificationPermission } from './utils/notifications'
+import { todayKey } from './utils/history'
 import BulkAddModal from './components/BulkAddModal'
 import SetupWizard from './components/SetupWizard'
 import UndoToast from './components/UndoToast'
@@ -136,6 +138,17 @@ export default function App() {
     onNotificationClick: focusPrayer
   })
 
+  // 🎂 Doğum günü tebriği (K-29)
+  useBirthdayGreeting({
+    birthDate: onboardingDone ? profile?.birthDate : null,
+    enabled: reminders.birthday
+  })
+  const enableBirthdayGreeting = useCallback(async () => {
+    const p = await ensureNotificationPermission()
+    if (p === 'granted') setReminders((prev) => ({ ...normalizeReminderSettings(prev), birthday: true }))
+    return p
+  }, [setReminders])
+
   const handleCardChange = useCallback(
     (id, nextValue, delta) => {
       const prevValue = counts[id] ?? 0
@@ -252,6 +265,10 @@ export default function App() {
             onOpenBulk={() => setModalOpen(true)}
             onCardChange={handleCardChange}
             highlightId={highlightId}
+            todayKaza={history[todayKey()]?.kaza}
+            birthdayGreetingEnabled={reminders.birthday}
+            onEnableBirthdayGreeting={enableBirthdayGreeting}
+            onSuggest={(id) => setHighlightId(id)}
           />
         )}
 

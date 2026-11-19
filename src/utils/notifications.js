@@ -29,6 +29,12 @@ export async function requestNotificationPermission() {
   }
 }
 
+/** İzin zaten verildiyse onu, henüz sorulmadıysa sorup sonucu döner. Dokunuş içinde çağrılmalı. */
+export async function ensureNotificationPermission() {
+  const p = getNotificationPermission()
+  return p === 'default' ? requestNotificationPermission() : p
+}
+
 const withTimeout = (promise, ms) =>
   Promise.race([promise, new Promise((resolve) => setTimeout(() => resolve(null), ms))])
 
