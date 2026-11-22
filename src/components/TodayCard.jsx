@@ -3,6 +3,7 @@ import { CalendarHeart, CheckCircle2, Lightbulb, MoonStar } from 'lucide-react'
 import { PRAYERS } from '../constants/prayers'
 import { getHijriDate } from '../utils/hijriDate'
 import { specialDayText, upcomingSpecialDays } from '../utils/specialDays'
+import { goalProgress } from '../utils/goal'
 
 const SPECIAL_HORIZON = 45 // gün — daha uzaktaki özel günler gösterilmez
 
@@ -20,7 +21,8 @@ export function suggestPrayer(counts) {
  * Takip ekranı "Bugün" kartı (Faz 5 — FR-TAK-07, FR-UX-04):
  * hicrî tarih · bugün kılınan · bugünün önerisi · yaklaşan mübarek gün/gece.
  */
-export default function TodayCard({ todayTotal, counts, onSuggest, now = new Date() }) {
+export default function TodayCard({ todayTotal, counts, onSuggest, goal = 0, now = new Date() }) {
+  const progress = goalProgress(todayTotal, goal)
   const dayKey = now.toDateString()
   const hijri = useMemo(() => getHijriDate(now), [dayKey]) // eslint-disable-line react-hooks/exhaustive-deps
   const special = useMemo(
@@ -46,10 +48,31 @@ export default function TodayCard({ todayTotal, counts, onSuggest, now = new Dat
             <CheckCircle2 size={13} aria-hidden="true" />
             Kılınan
           </p>
-          <p className="mt-1 text-2xl font-black tabular-nums text-primary-100 leading-none" data-testid="today-total">
-            {todayTotal.toLocaleString('tr-TR')}
+          <p className="mt-1 text-2xl font-black tabular-nums text-primary-100 leading-none">
+            <span data-testid="today-total">{todayTotal.toLocaleString('tr-TR')}</span>
+            {progress && <span className="text-sm font-bold text-primary-200/90"> / {progress.goal}</span>}
           </p>
-          <p className="mt-1 text-[11px] text-zinc-300">{todayTotal > 0 ? 'Allah kabul etsin' : 'Henüz kayıt yok'}</p>
+          {progress && (
+            <div
+              className="mt-2 h-1.5 rounded-full bg-white/[0.08] overflow-hidden"
+              role="progressbar"
+              aria-label="Günlük hedef"
+              aria-valuemin={0}
+              aria-valuemax={progress.goal}
+              aria-valuenow={Math.min(progress.done, progress.goal)}
+            >
+              <div className="h-full rounded-full bg-gradient-to-r from-primary-600 to-primary-400 transition-all" style={{ width: `${progress.ratio * 100}%` }} />
+            </div>
+          )}
+          <p className="mt-1.5 text-[11px] text-zinc-300" data-testid="today-goal-text">
+            {progress?.reached
+              ? 'Hedef tamam · Allah kabul etsin'
+              : progress
+                ? `Hedefe ${progress.left} kaldı`
+                : todayTotal > 0
+                  ? 'Allah kabul etsin'
+                  : 'Henüz kayıt yok'}
+          </p>
         </div>
 
         {suggestion ? (

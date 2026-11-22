@@ -11,14 +11,18 @@ import { useLocalStorage } from './hooks/useLocalStorage'
 import { useHistory } from './hooks/useHistory'
 import { useReminders } from './hooks/useReminders'
 import { useBirthdayGreeting } from './hooks/useBirthdayGreeting'
+import { useTheme } from './hooks/useTheme'
 import {
   STORAGE_KEY_LOCATION,
   STORAGE_KEY_PRAYER_OFFSETS,
-  STORAGE_KEY_REMINDERS
+  STORAGE_KEY_REMINDERS,
+  STORAGE_KEY_DAILY_GOAL
 } from './constants/storage'
+import { normalizeGoal } from './utils/goal'
 import { DEFAULT_REMINDER_SETTINGS, normalizeReminderSettings } from './utils/reminders'
 import { NOTIFICATION_CLICK_MESSAGE, ensureNotificationPermission } from './utils/notifications'
 import { todayKey } from './utils/history'
+import { withBirthDate } from './utils/birthDateInput'
 import BulkAddModal from './components/BulkAddModal'
 import SetupWizard from './components/SetupWizard'
 import UndoToast from './components/UndoToast'
@@ -43,6 +47,9 @@ export default function App() {
   // 📊 Günlük kaza geçmişi (Faz 0)
   const { history, recordChange, recordBulk, revertChange, resetHistory } = useHistory()
 
+  // 🎨 Tema (koyu varsayılan · açık · sistem)
+  const [themePref, setThemePref] = useTheme()
+
   // 🧭 Aktif sekme (Takip | Özet | Ayarlar)
   const [activeTab, setActiveTab] = useState('tracking')
 
@@ -51,6 +58,8 @@ export default function App() {
   const [offsets, setOffsets] = useLocalStorage(STORAGE_KEY_PRAYER_OFFSETS, DEFAULT_OFFSETS)
   const [remindersRaw, setReminders] = useLocalStorage(STORAGE_KEY_REMINDERS, DEFAULT_REMINDER_SETTINGS)
   const reminders = useMemo(() => normalizeReminderSettings(remindersRaw), [remindersRaw])
+  const [goalRaw, setDailyGoal] = useLocalStorage(STORAGE_KEY_DAILY_GOAL, 0)
+  const dailyGoal = normalizeGoal(goalRaw)
 
   // ✨ Bildirime dokununca: Takip sekmesi + ilgili vakit kartı vurgulanır
   const [highlightId, setHighlightId] = useState(null)
@@ -143,6 +152,9 @@ export default function App() {
     birthDate: onboardingDone ? profile?.birthDate : null,
     enabled: reminders.birthday
   })
+  // 🎂 Doğum tarihini sonradan ekle/değiştir (K-36) — borç hesabına dokunmaz
+  const setBirthDate = useCallback((v) => setProfile((prev) => withBirthDate(prev, v)), [setProfile])
+
   const enableBirthdayGreeting = useCallback(async () => {
     const p = await ensureNotificationPermission()
     if (p === 'granted') setReminders((prev) => ({ ...normalizeReminderSettings(prev), birthday: true }))
@@ -171,8 +183,11 @@ export default function App() {
       // delta < 0 → namaz kılındı (borç azaldı) → 'kaza'
       // delta > 0 → borç arttı → 'bulk'
       recordChange(id, delta, next)
+
+      // ➕ +1/+5 = YENİ BORÇ (K-34): yüzdenin paydası da büyür (toplu eklemeyle aynı kural)
+      if (delta > 0) setInitialTotal((prev) => (Number(prev) || 0) + delta)
     },
-    [counts, setCounts, recordChange]
+    [counts, setCounts, recordChange, setInitialTotal]
   )
 
   const handleUndo = useCallback(() => {
@@ -186,7 +201,12 @@ export default function App() {
 
     // 📊 Geçmişte de geri al
     revertChange(undoAction.prayerId, undoAction.delta, next)
-  }, [undoAction, setCounts, counts, revertChange])
+
+    // ➕ Geri alınan yeni borçsa başlangıç borcu da geri iner (K-34)
+    if (undoAction.delta > 0) {
+      setInitialTotal((prev) => Math.max(0, (Number(prev) || 0) - undoAction.delta))
+    }
+  }, [undoAction, setCounts, counts, revertChange, setInitialTotal])
 
   const handleUndoExpire = useCallback(() => {
     setUndoAction(null)
@@ -266,14 +286,21 @@ export default function App() {
             onCardChange={handleCardChange}
             highlightId={highlightId}
             todayKaza={history[todayKey()]?.kaza}
+            dailyGoal={dailyGoal}
             birthdayGreetingEnabled={reminders.birthday}
             onEnableBirthdayGreeting={enableBirthdayGreeting}
+            onBirthDateSave={setBirthDate}
             onSuggest={(id) => setHighlightId(id)}
           />
         )}
 
         {activeTab === 'summary' && (
-          <SummaryScreen history={history} totalRemaining={totalRemaining} />
+          <SummaryScreen
+            history={history}
+            totalRemaining={totalRemaining}
+            initialTotal={initialTotal}
+            dailyGoal={dailyGoal}
+          />
         )}
 
         {activeTab === 'settings' && (
@@ -286,6 +313,12 @@ export default function App() {
             onOffsetsChange={setOffsets}
             reminders={reminders}
             onRemindersChange={setReminders}
+            dailyGoal={dailyGoal}
+            onDailyGoalChange={setDailyGoal}
+            themePref={themePref}
+            onBirthDateChange={setBirthDate}
+            onThemeChange={setThemePref}
+            totalRemaining={totalRemaining}
           />
         )}
       </div>

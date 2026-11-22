@@ -154,7 +154,7 @@ export default function SetupWizard({ onComplete }) {
           <div className="animate-fade-in">
             {/* Logo / Başlık */}
             <div className="text-center mb-8">
-              <p className="font-serif text-accent-300/80 text-sm tracking-wide mb-2 select-none">
+              <p className="font-serif text-gold-300 text-sm tracking-wide mb-2 select-none">
                 بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
               </p>
               <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-900/40 via-accent-900/40 to-accent-900/30 border border-accent-500/30 shadow-lg mb-4">

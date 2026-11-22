@@ -108,3 +108,22 @@ describe('özet hesapları', () => {
     expect(PERIODS.month.bucketCount).toBe(6)
   })
 })
+
+describe('K-34: eklenen borç "kılınan" sayılmaz', () => {
+  const H = {
+    [T]: { ...createEmptyDayRecord(T), kaza: { ...zero, sabah: 2 }, bulk: { ...zero, sabah: 5000 }, toplamKaza: 2, toplamBulk: 5000 }
+  }
+  it('grafik sütunu yalnız kılınanı gösterir', () => {
+    expect(buildBuckets(H, 'day', 7)[6].toplam).toBe(2)
+    expect(buildBuckets(H, 'week', 4)[3].toplam).toBe(2)
+    expect(buildBuckets(H, 'month', 3)[2].toplam).toBe(2)
+  })
+  it('karşılaştırma yalnız kılınanı sayar', () => {
+    expect(comparePeriods(H, 'day', 7).simdiki).toBe(2)
+  })
+  it('vakit dağılımı yalnız kılınanı sayar', () => {
+    const sabah = buildPrayerBreakdown(H, 'day', 7).find((r) => r.id === 'sabah')
+    expect(sabah.toplam).toBe(2)
+    expect(sabah.yuzde).toBe(100)
+  })
+})

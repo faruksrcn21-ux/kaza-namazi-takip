@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { BarChart3, TrendingUp, TrendingDown, Minus, CalendarClock, Sparkles } from 'lucide-react'
 import BarChart from '../components/BarChart'
+import ShareProgress from '../components/ShareProgress'
 import {
   buildBuckets,
   buildPrayerBreakdown,
@@ -9,6 +10,10 @@ import {
   formatFinishDate,
   PERIODS
 } from '../utils/history'
+import { finishWithGoal } from '../utils/goal'
+
+const isoDay = (d) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 
 const PERIOD_ORDER = ['day', 'week', 'month']
 const fmtNum = (n) => (Number.isFinite(n) ? n.toLocaleString('tr-TR') : '0')
@@ -17,7 +22,8 @@ const fmtNum = (n) => (Number.isFinite(n) ? n.toLocaleString('tr-TR') : '0')
  * Özet ekranı (Faz 1): periyot seçici + sütun grafik + dağılım +
  * karşılaştırma + tahmini bitiş. Kayıt yoksa boş-durum kartı.
  */
-export default function SummaryScreen({ history, totalRemaining }) {
+export default function SummaryScreen({ history, totalRemaining, initialTotal = 0, dailyGoal = 0 }) {
+  const goalFinish = finishWithGoal(totalRemaining, dailyGoal)
   const [period, setPeriod] = useState('day')
   const bucketCount = PERIODS[period].bucketCount
 
@@ -97,7 +103,7 @@ export default function SummaryScreen({ history, totalRemaining }) {
                 </strong>
               </span>
             </div>
-            <BarChart data={buckets} />
+            <BarChart data={buckets} goal={period === 'day' ? dailyGoal : 0} />
           </section>
 
           <section className="grid grid-cols-2 gap-3">
@@ -127,12 +133,22 @@ export default function SummaryScreen({ history, totalRemaining }) {
                   <p className="text-[10px] text-zinc-500 mt-0.5">
                     En iyi gün: {fmtNum(finish.enIyiGun)}
                   </p>
+                  {goalFinish && (
+                    <p className="text-[10px] text-primary-200 mt-1 leading-relaxed" data-testid="goal-finish">
+                      Hedefinle ({dailyGoal}/gün): {formatFinishDate(isoDay(goalFinish.date))}
+                    </p>
+                  )}
                 </>
               ) : (
                 <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
                   {(totalRemaining ?? 0) <= 0
                     ? 'Borç kalmadı — elhamdülillah 🎉'
                     : 'Tahmin için son 7 günde kayıt gerekli'}
+                  {goalFinish && (
+                    <span className="block mt-1 text-[10px] text-primary-200" data-testid="goal-finish">
+                      Hedefinle ({dailyGoal}/gün): {formatFinishDate(isoDay(goalFinish.date))}
+                    </span>
+                  )}
                 </p>
               )}
             </div>
@@ -172,6 +188,10 @@ export default function SummaryScreen({ history, totalRemaining }) {
           </section>
         </div>
       )}
+
+      <div className="mt-3">
+        <ShareProgress history={history || {}} totalRemaining={totalRemaining ?? 0} initialTotal={initialTotal} />
+      </div>
     </div>
   )
 }

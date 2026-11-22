@@ -5,6 +5,9 @@ import LocationPicker from '../components/LocationPicker'
 import PrayerTimesCard from '../components/PrayerTimesCard'
 import NotificationSettings from '../components/NotificationSettings'
 import BirthdayGreetingSettings from '../components/BirthdayGreetingSettings'
+import GoalSettings from '../components/GoalSettings'
+import ThemeSettings from '../components/ThemeSettings'
+import ProfileSettings from '../components/ProfileSettings'
 import { usePrayerTimes } from '../hooks/usePrayerTimes'
 import { normalizeOffsets } from '../utils/prayerTimes'
 
@@ -20,7 +23,13 @@ export default function SettingsScreen({
   offsets,
   onOffsetsChange,
   reminders,
-  onRemindersChange
+  onRemindersChange,
+  dailyGoal,
+  onDailyGoalChange,
+  totalRemaining,
+  themePref,
+  onThemeChange,
+  onBirthDateChange
 }) {
   // Konum/sapma/bildirim durumu App'te tutulur: hatırlatma zamanlayıcısı da kullanır (Faz 3)
   const setLocation = onLocationChange
@@ -42,6 +51,10 @@ export default function SettingsScreen({
       </header>
 
       <div className="space-y-3">
+        <GoalSettings goal={dailyGoal} onChange={onDailyGoalChange} totalRemaining={totalRemaining} />
+        <ThemeSettings value={themePref} onChange={onThemeChange} />
+        <ProfileSettings profile={profile} onBirthDateChange={onBirthDateChange} />
+
         <section className="rounded-2xl islamic-card p-4 border border-white/[0.06]">
           <div className="flex items-center gap-3 mb-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-500/15 border border-primary-500/25">

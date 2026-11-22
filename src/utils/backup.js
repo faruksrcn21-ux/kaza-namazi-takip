@@ -8,6 +8,7 @@ import {
 import { normalizeHistory, sortedDays } from './history'
 import { getStoredSchemaVersion, runMigrations } from './migrations'
 import { normalizeReminderSettings } from './reminders'
+import { MAX_GOAL } from './goal'
 
 /**
  * YEDEKLEME / GERİ YÜKLEME (Faz 2.5 — FR-VRI-01, FR-VRI-02, UC-03)
@@ -18,7 +19,7 @@ import { normalizeReminderSettings } from './reminders'
  *   "format": 1,
  *   "schemaVersion": 1,
  *   "exportedAt": "2026-11-19T10:00:00.000Z",
- *   "data": { counts, initialTotal, onboardingDone, profile, history, location, offsets, reminders }
+ *   "data": { counts, initialTotal, onboardingDone, profile, history, location, offsets, reminders, dailyGoal }
  * }
  * Saf fonksiyonlar; depo parametre olarak verilir → test edilebilir.
  */
@@ -135,6 +136,14 @@ export function parseBackup(text) {
     reminders = normalizeReminderSettings(d.reminders)
   }
 
+  let dailyGoal = null
+  if (d.dailyGoal != null) {
+    if (!Number.isInteger(d.dailyGoal) || d.dailyGoal < 0 || d.dailyGoal > MAX_GOAL) {
+      return fail('Yedekteki günlük hedef geçersiz.')
+    }
+    dailyGoal = d.dailyGoal
+  }
+
   const backup = {
     app: BACKUP_APP_ID,
     format: BACKUP_FORMAT,
@@ -148,7 +157,8 @@ export function parseBackup(text) {
       history,
       location,
       offsets,
-      reminders
+      reminders,
+      dailyGoal
     }
   }
 

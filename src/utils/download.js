@@ -1,11 +1,11 @@
 /**
- * Metin dosyasını kullanıcıya verir.
+ * Metin (text) veya ikili (blob) dosyayı kullanıcıya verir.
  * preferShare=true ve dokunmatik cihazda dosya paylaşımı destekleniyorsa
  * paylaşım menüsü açılır; diğer durumlarda doğrudan indirilir.
  * @returns {Promise<'shared'|'downloaded'|'cancelled'>}
  */
-export async function deliverFile({ name, text, type, preferShare = false, shareTitle }) {
-  const file = new File([text], name, { type })
+export async function deliverFile({ name, text, blob, type, preferShare = false, shareTitle }) {
+  const file = new File([blob ?? text], name, { type })
 
   const coarse = window.matchMedia?.('(pointer: coarse)').matches
   if (preferShare && coarse && navigator.canShare?.({ files: [file] })) {

@@ -1,11 +1,9 @@
-import { PartyPopper, TrendingDown, Sparkles, HandHeart } from 'lucide-react'
+import { PartyPopper, TrendingDown, HandHeart } from 'lucide-react'
+import { progressPercent } from '../utils/progress'
 
 export default function ProgressHeader({ totalRemaining, initialTotal }) {
   const hasStarted = initialTotal > 0
-  const completed = hasStarted ? Math.max(0, initialTotal - totalRemaining) : 0
-  const percent = hasStarted
-    ? Math.min(100, Math.round((completed / initialTotal) * 100))
-    : 0
+  const percent = progressPercent(initialTotal, totalRemaining)
 
   return (
     <div className="sticky top-0 z-20 -mx-4 px-4 pt-4 pb-3.5 bg-surface-950/85 backdrop-blur-xl border-b border-accent-500/15 safe-top transition-all">
@@ -20,7 +18,7 @@ export default function ProgressHeader({ totalRemaining, initialTotal }) {
           </div>
           <div>
             <p className="text-base font-extrabold text-brand-gradient">Elhamdülillah, Kaza Borcun Kalmadı!</p>
-            <p className="text-xs text-primary-200/80 mt-0.5 font-serif italic flex items-center gap-1.5">
+            <p className="text-xs text-gold-200 mt-0.5 font-serif italic flex items-center gap-1.5">
               "Dualarınız ve ibadetleriniz kabul olsun."
               <HandHeart size={13} className="text-accent-400" />
             </p>
@@ -44,7 +42,6 @@ export default function ProgressHeader({ totalRemaining, initialTotal }) {
             {hasStarted && (
               <div className="text-right">
                 <div className="flex items-center justify-end gap-1">
-                  <Sparkles size={14} className="text-accent-400" />
                   <p className="text-2xl font-extrabold tabular-nums text-brand-gradient leading-none">
                     %{percent}
                   </p>

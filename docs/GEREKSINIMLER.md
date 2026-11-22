@@ -2,7 +2,7 @@
 
 | Alan | Değer |
 |---|---|
-| Sürüm | 0.6 (taslak) — doğum günü tebriği (K-29) |
+| Sürüm | 0.12 (taslak) — K-38 süs renkleri, açık tema yeşili |
 | Tarih | 19.11.2026 |
 | Dayanak | ISO/IEC/IEEE 29148 yapısı · MoSCoW önceliklendirme |
 | İlişkili belge | [PLANLAMA.txt](../PLANLAMA.txt) — karar günlüğü (K-xx) ve ilerleme günlüğü burada kalır |
@@ -105,9 +105,9 @@ dini doğruluğa hassastır.
 | FR-TAK-03 | Sayaç ±1 / ±5 ile değiştirilebilmeli; yanlış dokunuşa karşı **kilit modu** olmalı. | M | ✅ |
 | FR-TAK-04 | Her değişiklik birkaç saniye içinde **geri alınabilmeli** (Undo). | M | ✅ |
 | FR-TAK-05 | Toplu borç ekleme (yıl/ay/gün hesabıyla) yapılabilmeli. | M | ✅ |
-| FR-TAK-06 | Genel ilerleme (yüzde, kalan toplam) her an görünmeli. | M | ✅ |
+| FR-TAK-06 | Genel ilerleme (yüzde, kalan toplam) her an görünmeli. | M | ✅ Yüzde aşağı yuvarlanır, borç bitmeden %100 yok; +1/+5 paydayı büyütür (K-34) |
 | FR-TAK-07 | "Bugünün önerisi": en çok borcu kalan vakitten ne kılınabileceği önerilmeli. | C | ✅ Faz 5 (Bugün kartı) |
-| FR-TAK-08 | Günlük hedef belirleme ve hedef ilerlemesi. | C | ⬜ |
+| FR-TAK-08 | Günlük hedef belirleme ve hedef ilerlemesi. | C | ✅ K-30 |
 
 ### 5.2 Geçmiş ve özet (FR-GEC / FR-OZT)
 | ID | Gereksinim | Önc. | Durum |
@@ -115,11 +115,11 @@ dini doğruluğa hassastır.
 | FR-GEC-01 | Her sayaç değişimi o günün kaydına anlık yazılmalı (kaza / bulk ayrı kova, kalan borç anlık görüntüsü). | M | ✅ K-03, K-05, K-06 |
 | FR-GEC-02 | Geri alma, geçmiş kaydını da geri almalı. | M | ✅ |
 | FR-GEC-03 | Geçmiş sınırsız saklanmalı. | M | ✅ K-04 |
-| FR-OZT-01 | Günlük / Haftalık / Aylık seçici ile tek renk sütun grafiği. | M | ✅ K-08, K-15 |
-| FR-OZT-02 | Vakit dağılımı (yatay çubuk: ad + sayı + yüzde). | M | ✅ K-11 |
-| FR-OZT-03 | Önceki döneme göre karşılaştırma (yön + yüzde). | M | ✅ K-09 |
+| FR-OZT-01 | Günlük / Haftalık / Aylık seçici ile tek renk sütun grafiği. | M | ✅ K-08, K-15, K-34 (yalnız kılınan) |
+| FR-OZT-02 | Vakit dağılımı (yatay çubuk: ad + sayı + yüzde). | M | ✅ K-11, K-34 (yalnız kılınan) |
+| FR-OZT-03 | Önceki döneme göre karşılaştırma (yön + yüzde). | M | ✅ K-09, K-34 (yalnız kılınan) |
 | FR-OZT-04 | Tahmini bitiş tarihi (ortalama hız) + en iyi gün. | M | ✅ K-10 |
-| FR-OZT-05 | İlerleme kartını görsel olarak paylaşma (Web Share). | C | ⬜ |
+| FR-OZT-05 | İlerleme kartını görsel olarak paylaşma (Web Share). | C | ✅ K-31 (gizlilik varsayılan) |
 | FR-OZT-06 | Seri (streak) / rozet. | W | — K-08 gereği bu sürümde yok |
 
 ### 5.3 Vakit hesabı (FR-VKT)
@@ -141,6 +141,7 @@ dini doğruluğa hassastır.
 | FR-BLD-06 | Uygulama kapalıyken Web Push. | C | ⬜ Faz 4, **ayrı onay** (C-03) |
 | FR-BLD-07 | Ana ekran ikonunda kalan borç rozeti (Badging API, destekleyen cihazlarda). | C | ⬜ |
 | FR-BLD-08 | Doğum günü tebriği: Miladî/Hicrî doğum gününde yılda bir kez bildirim; uygulama kapalıyken için 10 yıllık takvim dosyası; 29 Şubat ve Hicrî 30 kenar durumları doğru. | S | ✅ K-29 |
+| FR-BLD-09 | Kurulumda doğum tarihi girmeyen kullanıcıya sonradan sorulmalı (Takip ekranında kapatılabilir kart) ve Ayarlar → Profil'den her zaman eklenip değiştirilebilmeli; borç hesabı değişmemeli. | S | ✅ K-36 |
 
 ### 5.5 Veri yönetimi (FR-VRI)
 | ID | Gereksinim | Önc. | Durum |
@@ -154,13 +155,13 @@ dini doğruluğa hassastır.
 ### 5.6 Görsel ve deneyim olgunlaştırma (FR-UX) — "daha güzel" hedefi
 | ID | Gereksinim | Önc. | Durum |
 |---|---|---|---|
-| FR-UX-01 | Tutarlı tasarım dili: renk, tipografi, boşluk ve köşe yuvarlaklığı tek yerden (Tailwind token) yönetilmeli; ekranlar arası tutarsızlık giderilmeli. | S | 🟡 Renk ✅ (K-16); tipografi/boşluk ⬜ |
-| FR-UX-07 | Renk sistemi **yeşil + mor** (K-16): yeşil = eda/ilerleme, mor = kimlik/yapı; yeşil→mor imza gradyanı yalnızca öne çıkan öğelerde; üçüncü bir vurgu rengi (turkuaz, sarı) kullanılmaz. Hata/silme için kırmızı (rose) istisnadır. | M | ✅ |
+| FR-UX-01 | Tutarlı tasarım dili: renk, tipografi, boşluk ve köşe yuvarlaklığı tek yerden (Tailwind token) yönetilmeli; ekranlar arası tutarsızlık giderilmeli. | S | ✅ Renk + tema token'ları (theme.css) |
+| FR-UX-07 | Renk sistemi (K-16, K-35, K-37): **orman yeşili** (klasik orman, #40916c) = eda/ilerleme, **elektrik moru** = vurgu/seçim, **kum beji** = nötr (metin/zemin). Yeşil→mor imza gradyanı yalnız öne çıkan öğelerde. Süs öğeleri (K-38): **altın** besmele/dua ve Öğle/Vitir simgesi, turuncu İkindi, pembe Akşam simgesi; eylem/seçim rollerinde ek renk yok (hata için kırmızı istisna). Tüm tonlar `tools/gen-theme.py`'den üretilir. | M | ✅ |
 | FR-UX-08 | Ana eylem (−1/−5 = kaza kılındı) görsel olarak en belirgin düğme olmalı; borç ekleme (+1/+5) ikincil görünmeli. | M | ✅ |
 | FR-UX-02 | Takip ekranı sadeleştirilmeli: ana eylem (kaza kılındı → −1) en fazla **1 dokunuş** (kilit açıkken) olmalı; ikincil öğeler (kurulum, doğum günü kartı) katlanabilir olmalı. | S | 🟡 Bugün kartı + "bugün N kılındı" + kapatılabilir bant; daha fazla sadeleştirme açık |
 | FR-UX-03 | Boş durum, yükleniyor ve hata durumları her ekranda tasarlanmış olmalı. | S | 🟡 |
 | FR-UX-04 | Hicri tarih ve özel gün (Ramazan, Kandil, Bayram) geri sayımı. | C | ✅ Faz 5 (±1 gün notuyla, K-26) |
-| FR-UX-05 | Açık tema seçeneği. | C | ⬜ |
+| FR-UX-05 | Açık tema seçeneği. | C | ✅ K-32/K-33 (varsayılan: sistem; koyu; açık) |
 | FR-UX-06 | Hafif mikro etkileşimler (titreşim, animasyon); `prefers-reduced-motion` gözetilmeli. | C | ✅ Titreşim (−1), reduced-motion korunuyor |
 
 ---
@@ -171,7 +172,7 @@ dini doğruluğa hassastır.
 |---|---|---|---|
 | NFR-01 | Güvenilirlik | Hiçbir güncelleme mevcut kullanıcı verisini silmemeli ya da bozmamalı. | v1 verisiyle açılış testi; migrasyon birim testleri |
 | NFR-02 | Çevrimdışı | Bildirim (Web Push) hariç tüm özellikler internetsiz çalışmalı. | Uçak modunda uçtan uca test |
-| NFR-03 | Performans | İlk yükleme orta seviye telefonda 4G'de < 2,5 sn; JS paketi gzip ≤ 100 KB. | Lighthouse ≥ 90 (Performans) · build çıktısı |
+| NFR-03 | Performans | İlk yükleme orta seviye telefonda 4G'de < 2,5 sn; JS paketi gzip ≤ 100 KB. | Lighthouse ≥ 90 (Performans) · build çıktısı  · güncel: JS gzip ~95 KB ⚠ sınıra yakın |
 | NFR-04 | Performans | Sayaç dokunuşu ile ekran güncellemesi arası < 100 ms. | Elle ölçüm / DevTools |
 | NFR-05 | Gizlilik | Kişisel veri (doğum tarihi, borç, konum) cihaz dışına çıkmamalı. Analitik yalnızca anonim sayfa görüntüleme. | Ağ isteği incelemesi |
 | NFR-06 | Erişilebilirlik | WCAG 2.2 AA: metin kontrastı ≥ 4.5:1, dokunma hedefi ≥ 24×24 px (2.5.8; ana eylemler ≥ 44×44), tüm düğmelerde erişilebilir ad. | `tools/test-a11y.mjs` (axe-core, 4 ekran): ciddi/kritik ihlal 0 ✅ (K-28) |
@@ -221,7 +222,7 @@ TD-01/TD-02 çözülmeden v2'nin hiçbir zaman güvenle yayına alınamaması.
 | **2.5** | **Temel sağlamlaştırma:** `npm test` (Vitest) + mevcut testlerin taşınması · şema sürümü + migrasyon katmanı · JSON dışa/içe aktarma · sıfırlamanın tek yere toplanması | FR-VRI-01..04, NFR-01, NFR-10 | ✅ |
 | 3 | Bildirimler (açıkken) + `.ics` + izin akışı; bildirim kodunun tek serviste toplanması | FR-BLD-01..05, TD-07 | ✅ |
 | 4 | Web Push — ayrı dal, ayrı Vercel preview, **ayrı onay** | FR-BLD-06 | ⬜ |
-| 5 | Görsel olgunlaştırma + cila: tasarım token'ları, takip ekranı sadeleştirme, erişilebilirlik denetimi, hicri geri sayım, paylaşım, öneri/hedef | FR-UX-*, FR-TAK-07/08, FR-OZT-05, NFR-03/06 | 🟡 1. tur |
+| 5 | Görsel olgunlaştırma + cila: tasarım token'ları, takip ekranı sadeleştirme, erişilebilirlik denetimi, hicri geri sayım, paylaşım, öneri/hedef | FR-UX-*, FR-TAK-07/08, FR-OZT-05, NFR-03/06 | ✅ |
 
 Her faz için **Bitti Tanımı (Definition of Done):**
 1. İlgili gereksinimlerin kabul ölçütleri sağlandı.

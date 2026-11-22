@@ -81,9 +81,9 @@ function PrayerCard({ prayer, count, onChange, index, locked = false, onLockHint
             </div>
           </div>
 
-          {/* Kalan borç — vaktin rengiyle (gün boyu yeşilden mora) */}
+          {/* Kalan borç — sade/nötr, tüm vakitlerde aynı renk (K-39) */}
           <div className="text-right">
-            <span className={`text-3xl font-black tabular-nums leading-none tracking-tight ${count > 0 ? prayer.numberColor : 'text-zinc-500'}`}>
+            <span className={`text-3xl font-black tabular-nums leading-none tracking-tight ${count > 0 ? 'text-zinc-50' : 'text-zinc-500'}`}>
               {count.toLocaleString('tr-TR')}
             </span>
           </div>
@@ -102,7 +102,7 @@ function PrayerCard({ prayer, count, onChange, index, locked = false, onLockHint
               <span className="flex items-center gap-1.5 text-zinc-400 text-xs font-medium px-3 py-1.5 rounded-full bg-surface-900/70 border border-white/[0.06] transition-colors group-hover/lockhint:text-accent-300 group-hover/lockhint:border-accent-500/40 group-hover/lockhint:bg-accent-900/25">
                 <Lock size={12} />
                 <span>Kilitli</span>
-                <span className="text-accent-400/80 font-semibold group-hover/lockhint:text-accent-300">
+                <span className="text-accent-300 font-semibold group-hover/lockhint:text-accent-200">
                   · kilidi aç
                 </span>
               </span>

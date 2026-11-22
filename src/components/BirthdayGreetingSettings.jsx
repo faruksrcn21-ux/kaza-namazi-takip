@@ -77,7 +77,7 @@ export default function BirthdayGreetingSettings({ birthDate, settings, onChange
           }`}
         >
           <span
-            className={`absolute top-0.5 h-[22px] w-[22px] rounded-full bg-white shadow transition-all ${
+            className={`absolute top-0.5 h-[22px] w-[22px] rounded-full bg-[#fff] shadow transition-all ${
               on ? 'left-[22px]' : 'left-0.5'
             }`}
           />

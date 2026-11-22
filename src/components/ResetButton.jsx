@@ -77,7 +77,7 @@ export default function ResetButton({ onConfirm }) {
                   onConfirm()
                   setOpen(false)
                 }}
-                className="flex-1 h-11 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 text-white font-bold active:scale-[0.98] transition-all hover:brightness-110 text-sm shadow-md shadow-rose-900/30"
+                className="flex-1 h-11 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 text-[#fff] font-bold active:scale-[0.98] transition-all hover:brightness-110 text-sm shadow-md shadow-rose-900/30"
               >
                 Sıfırla
               </button>

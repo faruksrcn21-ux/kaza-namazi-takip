@@ -3,7 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#08070d" />
+    <meta name="theme-color" content="#0f0e0c" />
+    <script>
+      // Tema React'ten önce uygulanır: açılışta yanlış tema yanıp sönmez (K-32)
+      (function () {
+        var t = 'dark'
+        try {
+          var p = JSON.parse(localStorage.getItem('kaza-namazi-takip-tema') || '"system"') // varsayılan: sistem (K-33)
+          if (p === 'light') t = 'light'
+          else if (p !== 'dark' && window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches) t = 'light'
+        } catch (e) {}
+        document.documentElement.setAttribute('data-theme', t)
+        if (t === 'light') document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f4efe4')
+      })()
+    </script>
     <meta name="description" content="Kaza namazlarınızı şık ve kolay bir şekilde takip edin." />
     <!-- Favicon & PWA Icons -->
     <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
@@ -13,7 +26,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Kaza Namazı Takip</title>
   </head>
-  <body class="bg-surface-950 font-sans">
+  <body class="font-sans">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

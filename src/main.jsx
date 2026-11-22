@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import { runMigrations } from './utils/migrations'
 // Gömülü fontlar (TD-10): Amiri yalnız besmele (Arapça) + italik alıntılar için
+import './theme.css'
 import './fonts.css'
 import '@fontsource/amiri/arabic-400.css'
 import '@fontsource/amiri/latin-400.css'

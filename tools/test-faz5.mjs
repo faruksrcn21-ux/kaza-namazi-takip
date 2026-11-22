@@ -154,6 +154,51 @@ try {
   check('Yeniden acilista ikinci kez gelmedi', again === 0, again)
   await send('Page.removeScriptToEvaluateOnNewDocument', { identifier: clock })
 
+  // ── K-36: doğum tarihi girmeyenlere sonradan sor ──
+  const setDate = (v) => evaluate(`(() => {
+    const el = document.querySelector('[data-testid="birthdate-form"] input[type="date"]');
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(el, ${JSON.stringify(v)});
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.form.requestSubmit(); return true })()`)
+  await evaluate(`(() => {
+    localStorage.setItem('kaza-namazi-takip-profil-v1', JSON.stringify({gender:'female', pubertyAge: 9, birthDate: ''}));
+    localStorage.removeItem('kaza-namazi-takip-dogum-sorma'); return true })()`)
+  await go()
+  check('Dogum tarihi yokken soru karti cikar', !!(await q('[data-testid="birthday-prompt"]', 'tagName')))
+  check('Dogum gunu karti yok', !(await text()).includes('Takvim & Yaş Bilgisi'))
+  await evaluate(`Array.from(document.querySelectorAll('[data-testid="birthday-prompt"] button')).find(b => b.textContent.trim() === 'Ekle').click(), true`)
+  await sleep(300)
+  const future = new Date(); future.setDate(future.getDate() + 3)
+  await setDate(`${future.getFullYear()}-${String(future.getMonth() + 1).padStart(2, '0')}-${String(future.getDate()).padStart(2, '0')}`)
+  await sleep(300)
+  check('Gelecek tarih reddedilir', ((await q('[data-testid="birthdate-form"] [role="alert"]')) || '').includes('gelecekte'))
+  await setDate('1990-03-15'); await sleep(500)
+  const prof = await evaluate(`JSON.parse(localStorage.getItem('kaza-namazi-takip-profil-v1'))`)
+  check('Kaydedildi, diger profil bilgileri korundu', prof.birthDate === '1990-03-15' && prof.gender === 'female' && prof.pubertyAge === 9, JSON.stringify(prof))
+  check('Soru karti kalkti, dogum gunu karti geldi', !(await q('[data-testid="birthday-prompt"]', 'tagName')) && (await text()).includes('Takvim & Yaş Bilgisi'))
+  await evaluate(`Array.from(document.querySelectorAll('nav[aria-label="Ana gezinme"] button')).find(b => b.textContent.includes('Ayarlar')).click(), true`)
+  await sleep(400)
+  check('Ayarlar > Profil: 15 Mart 1990', (await q('[data-testid="profile-birthdate"]')) === '15 Mart 1990')
+  check('Ayarlar > dogum gunu tebrigi bolumu artik gorunur', !!(await q('[data-testid="birthday-greeting"]', 'tagName')))
+  await evaluate(`Array.from(document.querySelectorAll('[data-testid="profile-settings"] button')).find(b => b.textContent.trim() === 'Değiştir').click(), true`)
+  await sleep(300)
+  await setDate('1991-07-01'); await sleep(400)
+  check('Ayarlardan degistirildi', (await q('[data-testid="profile-birthdate"]')) === '1 Temmuz 1991')
+
+  // "Sorma": bir daha sorulmaz, Ayarlar'dan yine eklenebilir
+  await evaluate(`localStorage.setItem('kaza-namazi-takip-profil-v1', JSON.stringify({gender:'male', birthDate: ''})); true`)
+  await go()
+  await evaluate(`Array.from(document.querySelectorAll('[data-testid="birthday-prompt"] button')).find(b => b.textContent.trim() === 'Sorma').click(), true`)
+  await sleep(300)
+  check('Sorma: kart gizlendi', !(await q('[data-testid="birthday-prompt"]', 'tagName')))
+  await go()
+  check('Sorma: yeniden acilista da sorulmaz', !(await q('[data-testid="birthday-prompt"]', 'tagName')))
+  await evaluate(`Array.from(document.querySelectorAll('nav[aria-label="Ana gezinme"] button')).find(b => b.textContent.includes('Ayarlar')).click(), true`)
+  await sleep(400)
+  check('Sorma sonrasi Ayarlar > Profil: Girilmedi + Ekle', (await q('[data-testid="profile-birthdate"]')) === 'Girilmedi')
+  await evaluate(`Array.from(document.querySelectorAll('nav[aria-label="Ana gezinme"] button')).find(b => b.textContent.includes('Takip')).click(), true`)
+  await sleep(300)
+
   // ── Borç bitince öneri ──
   await evaluate(`localStorage.setItem('kaza-namazi-takip-v1', JSON.stringify({sabah:0,ogle:0,ikindi:0,aksam:0,yatsi:0,vitir:0})); true`)
   await go()

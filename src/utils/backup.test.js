@@ -164,6 +164,24 @@ describe('bildirim ayarları (Faz 3)', () => {
   })
 })
 
+describe('günlük hedef (K-30)', () => {
+  it('yedekle taşınır', () => {
+    const s = filledStorage()
+    s.setItem('kaza-namazi-takip-hedef-v1', '6')
+    const r = parseBackup(textOf(createBackup(s)))
+    expect(r.ok).toBe(true)
+    expect(r.backup.data.dailyGoal).toBe(6)
+    const target = new MemoryStorage()
+    restoreBackup(target, r.backup)
+    expect(target.getItem('kaza-namazi-takip-hedef-v1')).toBe('6')
+  })
+  it('geçersiz hedef reddedilir', () => {
+    const b = createBackup(filledStorage())
+    b.data.dailyGoal = -3
+    expect(parseBackup(textOf(b)).ok).toBe(false)
+  })
+})
+
 describe('son yedek zamanı', () => {
   it('kaydedilir ve okunur', () => {
     const s = new MemoryStorage()

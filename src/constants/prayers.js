@@ -1,9 +1,10 @@
 import { Sunrise, Sun, CloudSun, Sunset, Moon, Star } from 'lucide-react'
 
 // Her vaktin kimliği, adı, ikonu ve renkleri.
-// Renk akışı (K-16): gün boyunca YEŞİLDEN MORA —
-//   Sabah/Öğle yeşil → İkindi geçiş (yeşil+mor) → Akşam/Yatsı/Vitir mor.
-// accentFrom/accentTo: ikon zemini · numberColor: kalan borç rakamı
+// Simgeler (K-38): gün ışığı renkleri — Sabah yeşil, Öğle altın, İkindi turuncu,
+//   Akşam gün batımı pembesi, Yatsı mor, Vitir altın (canlı sürümdeki gibi).
+// Sayılar (K-39): sade/nötr — tüm vakitlerde aynı renk (PrayerCard).
+// accentFrom/accentTo: ikon zemini
 export const PRAYERS = [
   {
     id: 'sabah',
@@ -14,7 +15,6 @@ export const PRAYERS = [
     accentTo: 'to-primary-950/40',
     borderColor: 'border-primary-500/25',
     iconColor: 'text-primary-300',
-    numberColor: 'text-primary-300',
     bgBadge: 'bg-primary-500/10 text-primary-300 border-primary-500/20'
   },
   {
@@ -22,11 +22,10 @@ export const PRAYERS = [
     name: 'Öğle',
     icon: Sun,
     isVitir: false,
-    accentFrom: 'from-primary-800/45',
-    accentTo: 'to-accent-950/40',
-    borderColor: 'border-primary-500/20',
-    iconColor: 'text-primary-300',
-    numberColor: 'text-primary-200',
+    accentFrom: 'from-gold-900/50',
+    accentTo: 'to-gold-800/30',
+    borderColor: 'border-gold-500/25',
+    iconColor: 'text-gold-400',
     bgBadge: 'bg-primary-500/10 text-primary-300 border-primary-500/20'
   },
   {
@@ -34,11 +33,10 @@ export const PRAYERS = [
     name: 'İkindi',
     icon: CloudSun,
     isVitir: false,
-    accentFrom: 'from-primary-900/45',
-    accentTo: 'to-accent-900/45',
-    borderColor: 'border-primary-400/15',
-    iconColor: 'text-primary-200',
-    numberColor: 'text-brand-gradient',
+    accentFrom: 'from-gold-950/50',
+    accentTo: 'to-orange-900/40',
+    borderColor: 'border-orange-500/25',
+    iconColor: 'text-orange-400',
     bgBadge: 'bg-accent-500/10 text-accent-300 border-accent-500/20'
   },
   {
@@ -46,11 +44,10 @@ export const PRAYERS = [
     name: 'Akşam',
     icon: Sunset,
     isVitir: false,
-    accentFrom: 'from-accent-800/45',
-    accentTo: 'to-primary-950/40',
-    borderColor: 'border-accent-500/20',
-    iconColor: 'text-accent-300',
-    numberColor: 'text-accent-200',
+    accentFrom: 'from-rose-950/50',
+    accentTo: 'to-accent-900/40',
+    borderColor: 'border-rose-500/25',
+    iconColor: 'text-rose-400',
     bgBadge: 'bg-accent-500/10 text-accent-300 border-accent-500/20'
   },
   {
@@ -58,11 +55,10 @@ export const PRAYERS = [
     name: 'Yatsı',
     icon: Moon,
     isVitir: false,
-    accentFrom: 'from-accent-800/50',
-    accentTo: 'to-accent-950/45',
+    accentFrom: 'from-accent-950/50',
+    accentTo: 'to-accent-900/40',
     borderColor: 'border-accent-500/25',
     iconColor: 'text-accent-300',
-    numberColor: 'text-accent-300',
     bgBadge: 'bg-accent-500/10 text-accent-300 border-accent-500/20'
   },
   {
@@ -70,11 +66,10 @@ export const PRAYERS = [
     name: 'Vitir',
     icon: Star,
     isVitir: true,
-    accentFrom: 'from-accent-700/45',
-    accentTo: 'to-accent-950/50',
-    borderColor: 'border-accent-400/30',
-    iconColor: 'text-accent-200',
-    numberColor: 'text-accent-200',
+    accentFrom: 'from-accent-950/50',
+    accentTo: 'to-gold-900/40',
+    borderColor: 'border-gold-500/30',
+    iconColor: 'text-gold-300',
     bgBadge: 'bg-accent-500/15 text-accent-200 border-accent-400/30'
   }
 ]

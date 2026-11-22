@@ -84,7 +84,7 @@ export default function BirthdayBanner({ profile, greetingEnabled = false, onEna
                   </span>
                 </p>
               )}
-              <div className="rounded-xl bg-surface-900/60 p-3 border border-white/[0.06] text-accent-200/90 font-serif italic text-sm">
+              <div className="rounded-xl bg-surface-900/60 p-3 border border-white/[0.06] text-gold-200 font-serif italic text-sm">
                 <HeartHandshake size={14} className="inline mr-1 text-accent-400" />
                 "Rabbimiz, ömrünüze bereket, ibadetlerinize huşû, kalbinize huzur versin. Yeni yaşınız hayırlara vesile olsun."{' '}
                 <HandHeart size={14} className="inline ml-1 text-accent-400" />

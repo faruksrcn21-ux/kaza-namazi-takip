@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "node tools/test-faz1.mjs && node tools/test-faz2.mjs && node tools/test-faz25.mjs && node tools/test-faz3.mjs && node tools/test-faz5.mjs && node tools/test-a11y.mjs"
+    "test:e2e": "node tools/test-faz1.mjs && node tools/test-faz2.mjs && node tools/test-faz25.mjs && node tools/test-faz3.mjs && node tools/test-faz5.mjs && node tools/test-faz5b.mjs && node tools/test-a11y.mjs"
   },
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "^5.1.1",

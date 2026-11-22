@@ -6,6 +6,7 @@ import ProgressHeader from '../components/ProgressHeader'
 import InstallPrompt from '../components/InstallPrompt'
 import BirthdayBanner from '../components/BirthdayBanner'
 import TodayCard from '../components/TodayCard'
+import BirthdayPrompt from '../components/BirthdayPrompt'
 
 /**
  * "Takip" sekmesi — mevcut ana ekran.
@@ -25,9 +26,11 @@ export default function TrackingScreen({
   onCardChange,
   highlightId,
   todayKaza,
+  dailyGoal,
   onSuggest,
   birthdayGreetingEnabled,
-  onEnableBirthdayGreeting
+  onEnableBirthdayGreeting,
+  onBirthDateSave
 }) {
   const todayTotal = Object.values(todayKaza || {}).reduce((s, n) => s + (n || 0), 0)
 
@@ -48,7 +51,7 @@ export default function TrackingScreen({
       {/* Görkemli Başlık Bölgesi */}
       <header className="pt-5 pb-4 text-center">
         {/* Besmele-i Şerif */}
-        <p className="font-serif text-accent-300/80 text-sm tracking-wide mb-1 select-none">
+        <p className="font-serif text-gold-300 text-sm tracking-wide mb-1 select-none">
           بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
         </p>
         <h1 className="text-2xl font-black text-brand-gradient tracking-tight">
@@ -62,12 +65,14 @@ export default function TrackingScreen({
       </header>
 
       {/* Bugün: hicrî tarih · kılınan · öneri · mübarek gün (Faz 5) */}
-      <TodayCard todayTotal={todayTotal} counts={counts} onSuggest={onSuggest} />
+      <TodayCard todayTotal={todayTotal} counts={counts} onSuggest={onSuggest} goal={dailyGoal} />
 
       {/* Telefona Yükle Banner'ı */}
       <InstallPrompt />
 
       {/* Hicrî & Miladî Doğum Günü Tebrik & Yaş Kartı */}
+      {/* Doğum tarihi yoksa sonradan sor (K-36), varsa doğum günü kartı */}
+      {!profile?.birthDate && <BirthdayPrompt onSave={onBirthDateSave} />}
       <BirthdayBanner
         profile={profile}
         greetingEnabled={birthdayGreetingEnabled}
@@ -97,7 +102,7 @@ export default function TrackingScreen({
           {locked ? (
             <>
               <Lock size={17} className={`relative text-accent-400 transition-transform duration-300 ${lockHintActive ? 'scale-110' : ''}`} />
-              <span className={`relative text-accent-300 text-xs font-bold tracking-wide transition-all duration-300 ${lockHintActive ? 'text-accent-100 drop-shadow-[0_0_8px_rgba(196,181,253,0.9)]' : ''}`}>
+              <span className={`relative text-accent-300 text-xs font-bold tracking-wide transition-all duration-300 ${lockHintActive ? 'text-accent-100 drop-shadow-[0_0_6px_rgb(var(--c-accent-300)/0.8)]' : ''}`}>
                 Kilitli
               </span>
               {lockHintActive && (

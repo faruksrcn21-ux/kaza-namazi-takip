@@ -1,4 +1,4 @@
-// Erişilebilirlik denetimi (NFR-06: WCAG 2.2 AA) — axe-core ile 4 ekran.
+// Erişilebilirlik denetimi (NFR-06: WCAG 2.2 AA) — axe-core ile 4 ekran × 2 tema (koyu/açık).
 // "serious" / "critical" ihlal varsa başarısız olur.
 // Önkoşul: `npm run build && npm run preview` (localhost:4173).
 import { spawn } from 'node:child_process'
@@ -45,17 +45,20 @@ const audit = async (screen) => {
   await evaluate(`document.fonts.ready.then(() => true)`)
   // Animasyonlar (fade-in) bitmeden kontrast yanlış ölçülmesin
   await sleep(700)
-  // Kontrast ölçülebilsin diye cam/gradyan yüzeyler, tonlarının AÇIK ucunun düz rengine çevrilir
-  // (açık zemin = açık renkli metin için en kötü durum). Gradyan metin (background-clip) ölçüm dışı.
+  // Kontrast ölçülebilsin diye cam/gradyan yüzeyler düz renge çevrilir — metin için EN KÖTÜ uç:
+  // koyu temada zeminin açık ucu, açık temada koyu ucu. Gradyan metin (background-clip) ölçüm dışı.
+  const flat = THEME === 'light'
+    ? { page: '#ebe3d2', card: '#f6f1e6', emerald: '#e2eee6', violet: '#efe6fb' }
+    : { page: '#0f0e0c', card: '#1d1b17', emerald: '#1c2a20', violet: '#241a2e' }
   await evaluate(`(() => {
-    if (document.getElementById('a11y-flatten')) return true;
+    document.getElementById('a11y-flatten')?.remove();
     const st = document.createElement('style'); st.id = 'a11y-flatten';
     st.textContent = \`
       * { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; animation: none !important; transition: none !important; }
-      .islamic-pattern, body { background-image: none !important; background-color: #08070d !important; }
-      .islamic-card { background: #161322 !important; }
-      .islamic-card-emerald { background: #0b2a24 !important; }
-      .islamic-card-violet { background: #1d1236 !important; }
+      .islamic-pattern, body { background-image: none !important; background-color: ${flat.page} !important; }
+      .islamic-card { background: ${flat.card} !important; }
+      .islamic-card-emerald { background: ${flat.emerald} !important; }
+      .islamic-card-violet { background: ${flat.violet} !important; }
       .blur-\[140px\], .blur-\[130px\], .blur-\[120px\], .blur-\[110px\], .mihrab-glow { display: none !important; }
     \`;
     document.head.appendChild(st);
@@ -72,11 +75,12 @@ const audit = async (screen) => {
       nodes: v.nodes.map(n => ({ target: n.target.join(' '), summary: n.failureSummary, html: n.html.slice(0, 140) }))
     }));
   })()`)
-  if (VERBOSE) console.log(`[${screen}] istatistik:`, JSON.stringify(await evaluate('window.__axeStats')))
-  return res.map((v) => ({ ...v, screen }))
+  if (VERBOSE) console.log(`[${screen}/${THEME}] tema=${await evaluate('document.documentElement.dataset.theme')} zemin=${await evaluate('getComputedStyle(document.body).backgroundColor')} istatistik:`, JSON.stringify((await evaluate('window.__axeStats')).incomplete), 'passes', (await evaluate('window.__axeStats')).passes)
+  return res.map((v) => ({ ...v, screen: `${screen}/${THEME === 'light' ? 'açık' : 'koyu'}` }))
 }
 
 const all = []
+let THEME = 'dark'
 try {
   let target
   for (let i = 0; i < 40 && !target; i++) {
@@ -92,14 +96,16 @@ try {
   await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true })
   await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] })
 
+  for (THEME of ['dark', 'light']) {
   // 1) Kurulum ekranı (boş cihaz)
   await go()
-  await evaluate(`localStorage.clear(); true`)
+  await evaluate(`localStorage.clear(); localStorage.setItem('kaza-namazi-takip-tema', JSON.stringify('${THEME}')); true`)
   await go()
   all.push(...(await audit('Kurulum')))
 
-  // 2) Dolu kullanıcı: geçmiş + konum + bildirim ayarı
+  // 2) Dolu kullanıcı: geçmiş + konum + bildirim ayarı + hedef
   await evaluate(`(() => {
+    localStorage.setItem('kaza-namazi-takip-hedef-v1', '6');
     localStorage.setItem('kaza-namazi-takip-onboarding-v1', 'true');
     localStorage.setItem('kaza-namazi-takip-baslangic-v1', '1000');
     localStorage.setItem('kaza-namazi-takip-v1', JSON.stringify({sabah:120,ogle:100,ikindi:90,aksam:80,yatsi:70,vitir:60}));
@@ -114,6 +120,7 @@ try {
   all.push(...(await audit('Özet')))
   await clickTab('Ayarlar'); await sleep(400)
   all.push(...(await audit('Ayarlar')))
+  }
 } catch (err) {
   console.error('HATA', err?.message || err)
   process.exitCode = 1

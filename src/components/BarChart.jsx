@@ -12,10 +12,10 @@ const PAD_B = 28
  * Her sütun o dönemin TOPLAM kılınan kazasını tek renkte gösterir
  * (zümrüt yeşili). Normal kaza ve toplu eklenen ayrımı YOKTUR (K-15).
  */
-export default function BarChart({ data }) {
+export default function BarChart({ data, goal = 0 }) {
   const gid = useId().replace(/[^a-zA-Z0-9]/g, '')
   const buckets = Array.isArray(data) ? data : []
-  const max = Math.max(1, ...buckets.map((b) => b.toplam || 0))
+  const max = Math.max(1, goal || 0, ...buckets.map((b) => b.toplam || 0))
   const n = Math.max(1, buckets.length)
   const plotH = H - PAD_T - PAD_B
   const base = H - PAD_B
@@ -36,8 +36,8 @@ export default function BarChart({ data }) {
       >
         <defs>
           <linearGradient id={`kaza-${gid}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#34d399" />
-            <stop offset="100%" stopColor="#059669" />
+            <stop offset="0%" style={{ stopColor: 'rgb(var(--c-primary-400))' }} />
+            <stop offset="100%" style={{ stopColor: 'rgb(var(--c-primary-600))' }} />
           </linearGradient>
         </defs>
 
@@ -47,16 +47,35 @@ export default function BarChart({ data }) {
           const val = Math.round(max * f)
           return (
             <g key={f}>
-              <line x1={PAD_L} y1={y} x2={W - PAD_R} y2={y} stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
-              <text x={W - PAD_R} y={y - 3} textAnchor="end" fontSize="8" fill="#8e8e98">
+              <line x1={PAD_L} y1={y} x2={W - PAD_R} y2={y} className="stroke-white/[0.08]" strokeWidth="1" />
+              <text x={W - PAD_R} y={y - 3} textAnchor="end" fontSize="8" className="fill-zinc-500">
                 {val}
               </text>
             </g>
           )
         })}
 
+        {/* Günlük hedef çizgisi (K-30) — nötr renk, sütun rengi tek kalır (K-15) */}
+        {goal > 0 && (
+          <g data-testid="goal-line">
+            <line
+              x1={PAD_L}
+              x2={W - PAD_R}
+              y1={base - plotH * (goal / max)}
+              y2={base - plotH * (goal / max)}
+              className="stroke-zinc-300"
+              strokeOpacity="0.55"
+              strokeWidth="1"
+              strokeDasharray="4 3"
+            />
+            <text x={PAD_L} y={base - plotH * (goal / max) - 3} fontSize="8" className="fill-zinc-300">
+              Hedef {goal}
+            </text>
+          </g>
+        )}
+
         {allZero && (
-          <text x={W / 2} y={base - plotH / 2} textAnchor="middle" fontSize="11" fill="#8e8e98">
+          <text x={W / 2} y={base - plotH / 2} textAnchor="middle" fontSize="11" className="fill-zinc-500">
             Bu dönemde kayıt yok
           </text>
         )}
@@ -87,17 +106,17 @@ export default function BarChart({ data }) {
                       width={barW + 4}
                       height={barH + 4}
                       fill="none"
-                      stroke="rgba(52,211,153,0.5)"
+                      className="stroke-primary-400/50"
                       strokeWidth="1.5"
                       rx={6}
                     />
                   )}
-                  <text x={x + barW / 2} y={barY - 4} textAnchor="middle" fontSize="9" fontWeight="700" fill="#d4d4d8">
+                  <text x={x + barW / 2} y={barY - 4} textAnchor="middle" fontSize="9" fontWeight="700" className="fill-zinc-300">
                     {toplam}
                   </text>
                 </>
               )}
-              <text x={x + barW / 2} y={H - 10} textAnchor="middle" fontSize="8.5" fill={isLast ? '#a7f3d0' : '#8e8e98'}>
+              <text x={x + barW / 2} y={H - 10} textAnchor="middle" fontSize="8.5" className={isLast ? 'fill-primary-200' : 'fill-zinc-500'}>
                 {b.label}
               </text>
             </g>

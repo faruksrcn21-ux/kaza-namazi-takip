@@ -190,7 +190,7 @@ export const sortedDays = (history = {}) =>
  * @param {Object} history   - normalize edilmiş geçmiş
  * @param {'day'|'week'|'month'} period
  * @param {number} bucketCount - kaç sütun gösterilecek
- * @returns {Array<{ key, label, kaza, bulk, kalan, toplam }>}
+ * @returns {Array<{ key, label, kaza, bulk, kalan, toplam }>}  toplam = kılınan (K-34)
  */
 export const buildBuckets = (history, period, bucketCount) => {
   const today = todayKey()
@@ -208,7 +208,7 @@ export const buildBuckets = (history, period, bucketCount) => {
         kaza: rec ? rec.toplamKaza : 0,
         bulk: rec ? rec.toplamBulk : 0,
         kalan: rec ? rec.toplamKalan : 0,
-        toplam: rec ? rec.toplamKaza + rec.toplamBulk : 0
+        toplam: rec ? rec.toplamKaza : 0 // K-34: yalnız kılınan (eklenen borç sayılmaz)
       })
     }
     return out
@@ -227,7 +227,7 @@ export const buildBuckets = (history, period, bucketCount) => {
       const kaza = inWeek.reduce((s, d) => s + d.toplamKaza, 0)
       const bulk = inWeek.reduce((s, d) => s + d.toplamBulk, 0)
       const kalan = inWeek.length ? inWeek[inWeek.length - 1].toplamKalan : 0
-      return { key: startKey, label, kaza, bulk, kalan, toplam: kaza + bulk }
+      return { key: startKey, label, kaza, bulk, kalan, toplam: kaza }
     })
   }
 
@@ -245,7 +245,7 @@ export const buildBuckets = (history, period, bucketCount) => {
     const kaza = inMonth.reduce((s, d) => s + d.toplamKaza, 0)
     const bulk = inMonth.reduce((s, d) => s + d.toplamBulk, 0)
     const kalan = inMonth.length ? inMonth[inMonth.length - 1].toplamKalan : 0
-    return { key, label, kaza, bulk, kalan, toplam: kaza + bulk }
+    return { key, label, kaza, bulk, kalan, toplam: kaza }
   })
 }
 
@@ -287,7 +287,7 @@ const bucketWindowSum = (history, period, bucketCount, offsetBuckets) => {
   const inWindow = days.filter((day) => day.date >= startKey && day.date <= endKey)
   const kaza = inWindow.reduce((s, day) => s + day.toplamKaza, 0)
   const bulk = inWindow.reduce((s, day) => s + day.toplamBulk, 0)
-  return { kaza, bulk, toplam: kaza + bulk }
+  return { kaza, bulk, toplam: kaza }
 }
 
 /**
@@ -352,7 +352,7 @@ export const buildPrayerBreakdown = (history, period, bucketCount) => {
   const rows = PRAYERS.map((prayer) => {
     const kaza = days.reduce((s, d) => s + (d.kaza?.[prayer.id] || 0), 0)
     const bulk = days.reduce((s, d) => s + (d.bulk?.[prayer.id] || 0), 0)
-    return { id: prayer.id, name: prayer.name, kaza, bulk, toplam: kaza + bulk }
+    return { id: prayer.id, name: prayer.name, kaza, bulk, toplam: kaza }
   })
 
   const grand = rows.reduce((s, r) => s + r.toplam, 0)

@@ -1,6 +1,6 @@
 ================================================================================
  KAZA NAMAZI TAKİP — GELİŞTİRME PLANLAMASI
- Tarih: 19.10.2026 | Güncelleme: 19.11.2026 | Durum: Faz 0-3 + 2.5 + Faz 5 (1. tur) TAMAM · Sıradaki: Faz 5 (2. tur) / Faz 4 (ayrı onayla)
+ Tarih: 19.10.2026 | Güncelleme: 19.11.2026 | Durum: Faz 0-3, 2.5 ve 5 TAMAM · Sıradaki: Faz 4 (ayrı onayla) / yayın hazırlığı
  Gereksinimler (SRS): docs/GEREKSINIMLER.md
 ================================================================================
 
@@ -105,6 +105,68 @@
                        - Duzeltmeler: tarih UTC degil yerel okunur; 29 Subat
                          dogumlular artik olmayan yilda 28 Subat'ta; Hicri 30
                          dogumlular ay 29 cekince 29'unda kutlanir.
+ K-30  Gunluk hedef (Faz 5/2): secenekler Yok/3/5/6/10/15/20 vakit/gun.
+                       Bugun karti "4 / 6" + cubuk; Ozet'te "Hedefinle bitis" ve
+                       gunluk grafikte kesikli hedef cizgisi (notr renk, K-15 korunur).
+                       Seri/rozet YOK (K-08). Hedef yedege dahil.
+ K-31  Ilerleme paylasimi: cihazda cizilen 1080x1350 JPEG kart (~100 KB).
+                       GIZLILIK VARSAYILAN: yalniz yuzde, bugun, son 7 gun, kayitli gun;
+                       kalan borc sayisi yalniz kutucuk isaretlenirse.
+ K-32  Acik tema: Koyu (VARSAYILAN, marka kimligi) / Acik / Sistem.
+                       Renkler CSS degiskenine baglandi (src/theme.css, uretici
+                       tools/gen-theme.py); acikta metin tonlari koyulasir. Tema
+                       index.html'deki satir ici betikle React'ten once uygulanir.
+                       Tercih cihaza ozel, yedege girmez.
+ K-33  Varsayilan tema SISTEM (21.11.2026, kullanici karari; K-32'nin
+                       "koyu varsayilan" kismini degistirir). Varsayilan cihaza
+                       yazilmaz, yalniz kullanici secince kaydedilir.
+ K-34  Sayim kurallari (21.11.2026, kullanici karari):
+                       - Kartlardaki +1/+5 = YENI BORC: baslangic borcu (yuzdenin
+                         paydasi) da artar; geri alinirsa geri iner. Toplu eklemeyle ayni.
+                       - Ozet grafigi, karsilastirma, vakit dagilimi ve "Toplam"
+                         YALNIZ KILINANI sayar; eklenen borc sayilmaz. (K-15/K-06'daki
+                         "kaza + bulk toplam sutun" uygulamasi duzeltildi; tek renk
+                         sutun karari aynen gecerli, bulk veri katmaninda ayri kalir.)
+                       - Yuzde asagi yuvarlanir; borc bitmeden %100 gosterilmez
+                         (eski Math.round 9.000'den 30 kala %100 diyordu).
+                       - Not: v1'de +1 ile eklenmis eski borclar baslangica eklenmemisti;
+                         gecmisten ayirt edilemedigi icin geriye donuk duzeltme yapilmaz.
+ K-35  PALET: ORMAN YESILI + KUM BEJI + ELEKTRIK MORU (22.11.2026, kullanici
+                       karari: "neon yerine sade, renkler ayni"). Roller (K-16) AYNEN:
+                       yesil = eda/ilerleme, mor = vurgu/secim. Yeni: kum beji = notr
+                       (koyu temada metinler sicak kum, acik temada zemin kum).
+                       Koyu zemin sicak komur (#0f0e0c), acik zemin kum (#f4efe4).
+                       Isimalar ve renkli golgeler kisildi. Tum renkler tek kaynaktan:
+                       tools/gen-theme.py -> src/theme.css + src/themeColors.js
+                       (paylasim karti da ayni tonlari kullanir). Uretici her calismada
+                       metin tonlarinin iki temada >= 4,5:1 oldugunu kontrol eder.
+                       Sadelik ayari: SOFTEN (1.0 su an; <1 daha sade).
+ K-36  Dogum tarihi sonradan (22.11.2026): kurulumda "Kaza sayimi biliyorum"
+                       diyenlerde dogum tarihi bos kaliyordu ve eklenecek yer YOKTU
+                       (dogum gunu karti/tebrik/takvim hic gorunmuyordu).
+                       - Takip: tarih yoksa nazik soru karti (Ekle / Sorma).
+                         "Sorma" cihazda kalici; Ayarlar'dan her zaman eklenebilir.
+                       - Ayarlar > Profil: dogum tarihini ekle/degistir.
+                       - Borc hesabini DEGISTIRMEZ; profilin diger alanlari korunur.
+                       - Dogrulama: gecerli tarih, gelecek degil, en fazla 120 yil once.
+ K-37  Yesil tonu (22.11.2026, kullanici karari): K-35'teki grimsi orman
+                       yesili (#43845c) "tam olmamis" bulundu. Eski/yeni/2 alternatif
+                       yan yana karsilastirildi; secilen: KLASIK ORMAN ("Dark Forest"
+                       skalasi, ana ton #40916c / #52b788). Kum beji + elektrik moru ayni.
+ K-38  Sus renkleri + acik yesil (22.11.2026, kullanici karari):
+                       - K-16'daki "yesil/mor disinda renk yok" kurali SUS ogeleri icin
+                         esnetildi: ALTIN = besmele, dua/"Allah kabul etsin" yazilari,
+                         Ogle ve Vitir simgesi; TURUNCU = Ikindi simgesi; PEMBE (rose) =
+                         Aksam simgesi (canli surumdeki gun isigi renkleri). Eylem ve
+                         secim rolleri yine yesil/mor.
+                       - Acik temada yesil metin tonlari bir kademe acildi (siyahimsi
+                         duruyordu); okunabilirlik esigi korunuyor.
+                       - "%N tamamlandi" yanindaki yildiz simgesi kaldirildi.
+ K-39  Kalan borc sayilari (22.11.2026, kullanici karari): gun boyu yesilden
+                       mora gecen sayi renkleri begenilmedi; 4 secenek yan yana
+                       karsilastirildi, secilen SADE/NOTR: tum vakitlerde ayni renk
+                       (koyu temada kum beyazi, acik temada koyu murekkep). Renk
+                       simgelerde (K-38) kalir. prayers.js numberColor alani kaldirildi.
 
 --------------------------------------------------------------------------------
 1. MEVCUT MİMARİNİN GERÇEK HÂLİ
@@ -509,6 +571,41 @@ F) ASAMA PLANI (her asama bagimsiz test edilebilir)
    etkinlik destegi. Dogrulama: npm test 89/89; e2e faz5 23/23 (sayfa saati
    dogum gunu 10:00'a alinip tebrigin tek kez geldigi ve yeniden acilista
    tekrar gelmedigi dogrulandi); faz1/2/25/3 ve a11y regresyon gecti.
+ * 19.11.2026 COMMIT (onayla, push YOK): f0b922d Faz 5 (1. tur).
+ * 19.11.2026 Faz 5 (2. tur) TAMAM (K-30..K-32): GoalSettings, ShareProgress
+   + utils/shareCard.js, ThemeSettings + hooks/useTheme.js + src/theme.css.
+   Erisilebilirlik denetimi artik iki temada (koyu + acik) calisir.
+   Dogrulama: npm test 100/100; e2e faz1 16, faz2 18, faz25 17, faz3 26,
+   faz5 23, YENI faz5b 19 (hepsi gecti); a11y 0 ciddi/kritik (2 tema).
+   NOT: JS paketi gzip ~95 KB — NFR-03 butcesi (100 KB) dolmak uzere.
+ * 21.11.2026 K-33 + K-34: varsayilan tema Sistem; yuzde tek yerde
+   (utils/progress.js, asagi yuvarlama); +1/+5 baslangic borcunu artirir;
+   Ozet yalniz kilinani sayar. Dogrulama: npm test 108/108; e2e faz1 16,
+   faz2 18, faz25 17, faz3 26, faz5 23, faz5b 28; a11y 0 ihlal (2 tema).
+ * 22.11.2026 K-35 palet uygulandi. Bulunan: elektrik moru 400 tonu koyu
+   zeminde 4,10 kontrast -> #b67aff (4,83); "kilidi ac" yazisi /80 opaklik
+   kaldirildi. Dogrulama: npm test 108/108; e2e hepsi gecti; a11y 0 (2 tema).
+ * 22.11.2026 K-36 dogum tarihi sonradan: BirthdayPrompt, ProfileSettings,
+   BirthDateForm, utils/birthDateInput.js. Dogrulama: npm test 113/113;
+   e2e faz5 34/34 (soru, gecersiz tarih, kayit, profil korunumu, Ayarlar'dan
+   degistirme, "Sorma" kaliciligi); diger e2e + a11y gecti.
+ * 22.11.2026 K-37 klasik orman yesili uygulandi (tools/gen-theme.py).
+   Dogrulama: okunabilirlik kontrolu iki temada gecti; npm test 113/113;
+   e2e faz1 16, faz2 18, faz25 17, faz3 26, faz5 34, faz5b 28; a11y 0 ihlal.
+ * 22.11.2026 K-38 uygulandi: tools/gen-theme.py'ye gold + orange skalalari,
+   prayers.js simge renkleri, besmele/dua altin, ProgressHeader yildiz yok.
+   Dogrulama: okunabilirlik (altin dahil) gecti; npm test 113/113; tum e2e
+   ve a11y (2 tema) gecti.
+ * 22.11.2026 K-39 sade sayilar uygulandi. Dogrulama: npm test 113/113;
+   e2e faz1 16, faz2 18, faz25 17, faz3 26, faz5 34, faz5b 28; a11y 0 ihlal.
+ * 22.11.2026 GERCEK GUNCELLEME TESTI (tools/test-guncelleme.mjs) 22/22:
+   canli surum (main) ayni adreste calisirken veri girildi + service worker kuruldu,
+   sunucu yeni surume gecirildi. Sonuc: 4 canli anahtarin hepsi BIREBIR ayni,
+   ekranda ayni kalan borc (7.257) ve yuzde (%19), sihirbaz tekrar acilmadi,
+   profil korundu; yeni surum 2. acilista devreye girdi. Geri donus (yeni ->
+   eski) de veri kaybisiz; eski surum yeni surumun yazdigi veriyle calisiyor.
+   SART: yeni surum AYNI adrese (ayni Vercel projesi/alan adi) yayinlanmali;
+   farkli adres = farkli tarayici deposu = veri gorunmez.
 
 --------------------------------------------------------------------------------
 8. OZET / VARSAYILAN
